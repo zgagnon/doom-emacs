@@ -1,15 +1,5 @@
 ;; config.el -*- lexical-binding: t; -*-
 
-(use-package! treesit-auto
-  :config
-  (global-treesit-auto-mode))
-
-(use-package! typescript-ts-mode
-  :mode (("\\.ts\\'" . typescript-ts-mode)
-         ("\\.tsx\\'" . tsx-ts-mode))
-  :config
-  (add-hook! '(typescript-ts-mode-hook tsx-ts-mode-hook) #'lsp!))
-
 (after! projectile
   (projectile-register-project-type 'bun
                                     '("bun.lockb")
@@ -82,6 +72,13 @@
 (setq user-full-name "Zoe Gagnon"
       user-mail-address "zoe@zgagnon.com")
 
+(use-package! treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
 (use-package! lsp-tailwindcss)
 
 (setq read-process-output-max (* 1024 1024))
@@ -126,28 +123,28 @@ name as well to trigger updates"
   (defun workspaces-formatted ()
     ;; fancy version as in screenshot
     (+doom-dashboard--center (frame-width)
-                             (let ((names (or persp-names-cache nil))
-                                   (current-name (safe-persp-name (get-current-persp))))
-                               (mapconcat
-                                #'identity
-                                (cl-loop for name in names
-                                         for i to (length names)
-                                         collect
-                                         (concat (propertize (format " %d" (1+ i)) 'face
-                                                             `(:inherit ,(if (equal current-name name)
-                                                                             '+workspace-tab-selected-face
-                                                                           '+workspace-tab-face)
-                                                               :weight bold))
-                                                 (propertize (format " %s " name) 'face
-                                                             (if (equal current-name name)
-                                                                 '+workspace-tab-selected-face
-                                                               '+workspace-tab-face))))
-                                " ")))))
+        (let ((names (or persp-names-cache nil))
+                (current-name (safe-persp-name (get-current-persp))))
+        (mapconcat
+        #'identity
+        (cl-loop for name in names
+                for i to (length names)
+                collect
+                (concat (propertize (format " %d" (1+ i)) 'face
+                        `(:inherit ,(if (equal current-name name)
+                                        '+workspace-tab-selected-face
+                                        '+workspace-tab-face)
+                        :weight bold))
+                (propertize (format " %s " name) 'face
+                        (if (equal current-name name)
+                                '+workspace-tab-selected-face
+                        '+workspace-tab-face))))
+        " "))))
 ;; other persp-mode related configuration
-
+)
 
 (setq doom-font (font-spec :family "FiraCode Nerd Font" :size 18 :weight 'medium)
-      doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font" :size 18)
+     doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font" :size 18)
       doom-symbol-font (font-spec :family "FiraCode Nerd Font" :size 18)
       doom-serif-font (font-spec :family "FiraCode Nerd Font" :size 18))
 
@@ -159,11 +156,11 @@ name as well to trigger updates"
       (setq initial-frame-alist
             '((tool-bar-lines . 0)
               (width . 200)
-              (height . 400)))))
-
-
-
-
+              (height . 400)
+              )
+            )
+      )
+  )
 
 (setq org-directory "~/org/")
 
@@ -174,8 +171,8 @@ name as well to trigger updates"
   `(org-level-3 :family "Rockwell" :height 200)
   `(org-level-4 :family "Rockwell" :height 150)
   `(org-level-5 :family "Rockwell" :height 150)
-  `(org-level-6 :family "Rockwell" :height 150))
-
+  `(org-level-6 :family "Rockwell" :height 150)
+                )
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)

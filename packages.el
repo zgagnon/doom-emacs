@@ -1,13 +1,14 @@
 ;; -*- no-byte-compile: t; -*-
 ;; $doomdir/packages.el
 
-(package! treesit-auto)
-
 (package! cobol-mode)
 
 (package! just-mode)
 
 (package! csv-mode)
+
+(package! treesit-auto)
+(package! evil-textobj-tree-sitter)
 
 (package! lsp-tailwindcss :recipe (:host github :repo "merrickluo/lsp-tailwindcss"))
 
