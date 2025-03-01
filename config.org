@@ -1,0 +1,672 @@
+* Doom Configuration
+*** [[Doom Config Head Matter]]
+** [[Input]]
+** [[Completion]]
+** [[UI]]
+*** [[Appearance]]
+*** [[Org]]
+*** [[Themes]]
+** [[Editor]]
+*** [[Persp Mode]]
+*** [[GPTel]]
+** [[Emacs]]
+*** [[Identity]]
+** [[Terminal]]
+** [[Checkers]]
+** [[Tools]]
+*** [[LSP]]
+*** [[Treesitter]]
+** [[OS]]
+** [[Lang]]
+*** [[Elixir]]
+*** [[Just]]
+*** [[CSV]]
+*** [[Tailwind]]
+** [[Email]]
+** [[Apps]]
+*** [[Init.el]]
+*** [[Config.el]]
+
+*** [[Packages.el]]
+
+
+*** Doom Config Head Matter
+define each config file to have lexical scope
+#+begin_src elisp :tangle config.el
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+#+end_src
+ 
+#+begin_src elisp :tangle init.el
+;;; init.el -*- lexical-binding: t; -*-
+;; This file controls what Doom modules are enabled and what order they load
+;; in. Remember to run 'doom sync' after modifying it!
+
+;; NOTE Press 'SPC h d h' (or 'C-h d h' for non-vim users) to access Doom's
+;;      documentation. There you'll find a link to Doom's Module Index where all
+;;      of our modules are listed, including what flags they support.
+
+;; NOTE Move your cursor over a module's name (or its flags) and press 'K' (or
+;;      'C-c c k' for non-vim users) to view its documentation. This works on
+;;      flags as well (those symbols that start with a plus).
+;;
+;;      Alternatively, press 'gd' (or 'C-c c d') on a module to browse its
+;;      directory (for easy access to its source code).
+
+(doom!
+#+end_src
+
+#+begin_src elisp :tangle packages.el
+;; -*- no-byte-compile: t; -*-
+;;; $DOOMDIR/packages.el
+#+end_src
+
+** Input
+
+Packages which control input methods and direction
+
+#+begin_src elisp :tangle init.el
+       :input
+       ;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
+       ;;chinese
+       ;;japanese
+       ;;layout            ; auie,ctsrnm is the superior home row
+
+#+end_src
+
+** Completion
+
+
+
+#+begin_src elisp :tangle init.el
+       :completion
+       ;;company           ; the ultimate code completion backend
+       (corfu +orderless +icons)  ; complete with cap(f), cape and a flying feather!
+       ;;helm              ; the *other* search engine for love and life
+       ;;ido               ; the other *other* search engine...
+       ;;ivy               ; a search engine for love and life
+       ( vertico +icons)           ; the search engine of the future
+#+end_src
+
+** UI
+
+#+begin_src elisp :tangle init.el
+       :ui
+       ;;deft              ; notational velocity for Emacs
+       doom              ; what makes DOOM look the way it does
+       doom-dashboard    ; a nifty splash screen for Emacs
+       ;;doom-quit         ; DOOM quit-message prompts when you quit Emacs
+       (emoji +unicode +github)  ; 🙂
+       hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
+       ;;indent-guides     ; highlighted indent columns
+       ( ligatures +extra)         ; ligatures and symbols to make your code pretty again
+       ;;minimap           ; show a map of the code on the side
+       modeline          ; snazzy, Atom-inspired modeline, plus API
+       ;;nav-flash         ; blink cursor line after big motions
+       ;;neotree           ; a project drawer, like NERDTree for vim
+       ophints           ; highlight the region an operation acts on
+       (popup +defaults)   ; tame sudden yet inevitable temporary windows
+       ;;tabs              ; a tab bar for Emacs
+       treemacs          ; a project drawer, like neotree but cooler
+       unicode           ; extended unicode support for various languages
+       (vc-gutter +pretty) ; vcs diff in the fringe
+       vi-tilde-fringe   ; fringe tildes to mark beyond EOB
+       ;;window-select     ; visually switch windows
+       workspaces        ; tab emulation, persistence & separate workspaces
+      ;;zen               ; distraction-free coding or writing
+#+end_src
+
+*** Appearance
+**** Font
+#+begin_src elisp :tangle config.el
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 18 :weight 'medium)
+     doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font" :size 18)
+      doom-symbol-font (font-spec :family "FiraCode Nerd Font" :size 18)
+      doom-serif-font (font-spec :family "FiraCode Nerd Font" :size 18))
+#+end_src
+
+*** Org
+
+#+begin_src elisp :tangle config.el
+(setq org-directory "~/org/")
+
+
+(custom-set-faces!
+  `(org-level-1 :family "Luminari" :height 400)
+  `(org-level-2 :family "Cochin" :height 300)
+  `(org-level-3 :family "Rockwell" :height 200)
+  `(org-level-4 :family "Rockwell" :height 150)
+  `(org-level-5 :family "Rockwell" :height 150)
+  `(org-level-6 :family "Rockwell" :height 150)
+                )
+
+#+end_src
+
+*** Themes
+
+#+begin_src elisp :tangle packages.el
+
+(package! catppuccin-theme)
+#+end_src
+** Editor
+
+#+begin_src elisp :tangle init.el
+       :editor
+       (evil +everywhere); come to the dark side, we have cookies
+       file-templates    ; auto-snippets for empty files
+       ( fold +onsave +lsp)              ; (nigh) universal code folding
+       ;;(format +onsave)  ; automated prettiness
+       ;;god               ; run Emacs commands without modifier keys
+       ;;lispy             ; vim for lisp, for people who don't like vim
+       multiple-cursors  ; editing in many places at once
+       ;;objed             ; text object editing for the innocent
+       ;;parinfer          ; turn lisp into python, sort of
+       ;;rotate-text       ; cycle region at point between text candidates
+       snippets          ; my elves. They type so I don't have to
+       word-wrap         ; soft wrapping with language-aware indent
+
+#+end_src
+
+*** Basic settings
+#+begin_src elisp :tangle config.el
+(setq display-line-numbers-type t)
+(setq-default tab-width 2)
+(global-visual-line-mode 1)
+(if (display-graphic-p)
+    (progn
+      (setq initial-frame-alist
+            '((tool-bar-lines . 0)
+              (width . 200)
+              (height . 400)
+              )
+            )
+      )
+  )
+
+(add-function :after after-focus-change-function
+  (lambda ()
+    (save-some-buffers t)))
+
+#+end_src
+
+*** Persp Mode
+
+Create a tab bar across the screen to display the workspaces
+#+begin_src elisp :tangle config.el
+(after! persp-mode
+  ;; alternative, non-fancy version which only centers the output of +workspace--tabline
+  (defun workspaces-formatted ()
+    (+doom-dashboard--center (frame-width) (+workspace--tabline)))
+
+  (defun hy/invisible-current-workspace ()
+    "The tab bar doesn't update when only faces change (i.e. the
+current workspace), so we invisibly print the current workspace
+name as well to trigger updates"
+    (propertize (safe-persp-name (get-current-persp)) 'invisible t))
+
+  (customize-set-variable 'tab-bar-format '(workspaces-formatted tab-bar-format-align-right hy/invisible-current-workspace))
+
+  ;; don't show current workspaces when we switch, since we always see them
+  (advice-add #'+workspace/display :override #'ignore)
+  ;; same for renaming and deleting (and saving, but oh well)
+  (advice-add #'+workspace-message :override #'ignore))
+
+;; need to run this later for it to not break frame size for some reason
+(run-at-time nil nil (cmd! (tab-bar-mode +1)))
+
+(custom-set-faces!
+  '(+workspace-tab-face :inherit default :family "Jost" :height 135)
+  '(+workspace-tab-selected-face :inherit (highlight +workspace-tab-face)))
+
+(after! persp-mode
+  (defun workspaces-formatted ()
+    ;; fancy version as in screenshot
+    (+doom-dashboard--center (frame-width)
+        (let ((names (or persp-names-cache nil))
+                (current-name (safe-persp-name (get-current-persp))))
+        (mapconcat
+        #'identity
+        (cl-loop for name in names
+                for i to (length names)
+                collect
+                (concat (propertize (format " %d" (1+ i)) 'face
+                        `(:inherit ,(if (equal current-name name)
+                                        '+workspace-tab-selected-face
+                                        '+workspace-tab-face)
+                        :weight bold))
+                (propertize (format " %s " name) 'face
+                        (if (equal current-name name)
+                                '+workspace-tab-selected-face
+                        '+workspace-tab-face))))
+        " "))))
+;; other persp-mode related configuration
+)
+#+end_src
+*** GPTel
+#+begin_src elisp :tangle packages.el
+(package! gptel)
+#+end_src
+#+begin_src elisp :tangle config.el
+(setq auth-sources '((:source "~/.authinfo")))
+
+(use-package! gptel)
+
+(after! gptel
+  (map! :leader
+        (:prefix ("r" . "robot chat")
+         :desc  "Send the contents of the buffer up to point" "s"#'gptel-send
+         :desc  "Open a new chat buffer" "o" #'gptel
+         :desc "Open gptel menu" "m"  #'gptel-menu
+         :desc  "Add a region or buffer to the chat context" "a" #'gptel-add
+         :desc  "Add a file to the chat context" "f" #'gptel-add-file
+         :desc "Rewrite selected region" "r" #'gptel-rewrite
+         :desc "Limit to org mode topic" "t"  #'gptel-org-set-topic)))
+
+
+#+end_src
+
+*** Aider
+
+Interact with Aider via Emacs
+
+#+begin_src elisp :tangle packages.el
+(package! aider :recipe (:host github :repo "tninja/aider.el" :files ("aider.el" "aider-doom.el")))
+#+end_src
+
+#+begin_src elisp :tangle config.el
+(use-package aider
+  :config
+  (setq aider-args '("--model" "gpt-4o-mini")))
+#+end_src
+** Emacs
+
+#+begin_src elisp :tangle init.el
+       :emacs
+       ( dired +dirvish +icons)             ; making dired pretty [functional]
+       electric          ; smarter, keyword-based electric-indent
+       ;;eww               ; the internet is gross
+       ( ibuffer +icons)           ; interactive buffer management
+       ( undo +tree)              ; persistent, smarter undo for your inevitable mistakes
+       vc                ; version-control and Emacs, sitting in a tree
+
+#+end_src
+
+*** Identity
+
+#+begin_src elisp :tangle config.el
+(setq user-full-name "Zoe Gagnon"
+      user-mail-address "zoe@zgagnon.com")
+
+#+end_src
+** Terminal
+
+#+begin_src elisp :tangle init.el
+       :term
+       ;;eshell            ; the elisp shell that works everywhere
+       ;;shell             ; simple shell REPL for Emacs
+       ;;term              ; basic terminal emulator for Emacs
+       ;;vterm             ; the best terminal emulation in Emacs
+#+end_src
+
+** Checkers
+
+#+begin_src elisp :tangle init.el
+       :checkers
+       syntax              ; tasing you for every semicolon you forget
+       ;;(spell +flyspell) ; tasing you for misspelling mispelling
+       ;;grammar           ; tasing grammar mistake every you make
+#+end_src
+
+** Tools
+
+#+begin_src elisp :tangle init.el
+       :tools
+       ;;ansible
+       ;;biblio            ; Writes a PhD for you (citation needed)
+       ;;collab            ; buffers with friends
+       ( debugger +lsp)          ; FIXME stepping through code, to help you add bugs
+       direnv
+       ;;docker
+       ;;editorconfig      ; let someone else argue about tabs vs spaces
+       ;;ein               ; tame Jupyter notebooks with emacs
+       (eval +overlay)     ; run code, run (also, repls)
+       lookup              ; navigate your code and its documentation
+       ( lsp +peek)               ; M-x vscode
+       ;; magit             ; a git porcelain for Emacs
+       ;;make              ; run make tasks from Emacs
+       ;;pass              ; password manager for nerds
+       ;;pdf               ; pdf enhancements
+       ;;prodigy           ; FIXME managing external services & code builders
+       ;;terraform         ; infrastructure as code
+       ;;tmux              ; an API for interacting with tmux
+       ;;tree-sitter       ; syntax and parsing, sitting in a tree...
+       ;;upload            ; map local to remote projects via ssh/ftp
+
+#+end_src
+
+*** LSP
+#+begin_src elisp :tangle config.el
+(setq read-process-output-max (* 1024 1024))
+(setq gc-cons-threshold 100000000)
+(setq lsp-idle-delay 0.5)
+#+end_src
+
+*** Treesitter
+
+#+begin_src elisp :tangle packages.el
+(package! treesit-auto)
+(package! evil-textobj-tree-sitter)
+#+end_src
+
+#+begin_src elisp :tangle config.el
+(use-package! treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
+#+end_src
+** OS
+
+#+begin_src elisp :tangle init.el
+
+       :os
+       (:if (featurep :system 'macos) macos)  ; improve compatibility with macOS
+       ( tty +osc)               ; improve the terminal Emacs experience
+
+#+end_src
+
+** Lang
+
+#+begin_src elisp :tangle init.el
+       :lang
+       ;;agda              ; types of types of types of types...
+       ;;beancount         ; mind the GAAP
+       ;;(cc +lsp)         ; C > C++ == 1
+       ;;clojure           ; java with a lisp
+       ;;common-lisp       ; if you've seen one lisp, you've seen them all
+       ;;coq               ; proofs-as-programs
+       ;;crystal           ; ruby at the speed of c
+       ;;csharp            ; unity, .NET, and mono shenanigans
+       ;;data              ; config/data formats
+       ;;(dart +flutter)   ; paint ui and not much else
+       ;;dhall
+#+end_src
+
+Skip to [[Lang II]] if you don't want Elixir
+
+*** Elixir
+#+begin_src elisp :tangle init.el
+       (elixir +lsp)            ; erlang done right
+#+end_src
+
+Configure extra packages
+
+#+begin_src elisp :tangle packages.el
+(package! exunit)
+(package! flycheck-credo)
+#+end_src
+
+#+begin_src elisp :tangle config.el
+(after! elixir-ts-mode
+  (map! :map elixir-ts-mode-map
+        :leader
+        (:prefix ("m t" . "Exunit tests")
+         :desc "Verify single ExUnit test" "s" #'exunit-verify-single
+         :desc "Verify all ExUnit tests" "a" #'exunit-verify-all
+         :desc "Verify all tests in the umbrella project" "u" #'exunit-verify-all-in-umbrella
+         :desc "Run all tests in this buffer" "v" #'exunit-verify
+         :desc "Rerun the last test invocation" "r" #'exunit-rerun
+         :desc "Rerun the last test with debugging" "d" #'exunit-debug
+         :desc "Toggle between file and test" "t" #'exunit-toggle-file-and-test
+         )))
+#+end_src
+
+*** Just
+
+#+begin_src elisp :tangle packages.el
+(package! just-mode)
+#+end_src
+
+*** CSV
+#+begin_src elisp :tangle packages.el
+(package! csv-mode)
+#+end_src
+
+*** Tailwind
+
+#+begin_src elisp :tangle packages.el
+(package! lsp-tailwindcss :recipe (:host github :repo "merrickluo/lsp-tailwindcss"))
+#+end_src
+
+#+begin_src elisp :tangle config.el
+(use-package! lsp-tailwindcss)
+#+end_src
+*** Lang II
+#+begin_src elisp :tangle init.el
+
+       ;;elm               ; care for a cup of TEA?
+       emacs-lisp        ; drown in parentheses
+       ;;erlang            ; an elegant language for a more civilized age
+       ;;ess               ; emacs speaks statistics
+       ;;factor
+       ;;faust             ; dsp, but you get to keep your soul
+       ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
+       ;;fsharp            ; ML stands for Microsoft's Language
+       ;;fstar             ; (dependent) types and (monadic) effects and Z3
+       ;;gdscript          ; the language you waited for
+       (go +lsp)         ; the hipster dialect
+       ;;(graphql +lsp)    ; Give queries a REST
+       ;;(haskell +lsp)    ; a language that's lazier than I am
+       ;;hy                ; readability of scheme w/ speed of python
+       ;;idris             ; a language you can depend on
+       json              ; At least it ain't XML
+       ;;(java +lsp)       ; the poster child for carpal tunnel syndrome
+       (javascript +lsp)        ; all(hope(abandon(ye(who(enter(here))))))
+       ;;julia             ; a better, faster MATLAB
+       ;;kotlin            ; a better, slicker Java(Script)
+       ;;latex             ; writing papers in Emacs has never been so fun
+       ;;lean              ; for folks with too much to prove
+       ;;ledger            ; be audit you can be
+       ;;lua               ; one-based indices? one-based indices
+       markdown          ; writing docs for people to ignore
+       ;;nim               ; python + lisp at the speed of c
+       (nix +lsp)               ; I hereby declare "nix geht mehr!"
+       ;;ocaml             ; an objective camel
+       org               ; organize your plain life in plain text
+       ;;php               ; perl's insecure younger brother
+       ;;plantuml          ; diagrams for confusing people more
+       ;;graphviz          ; diagrams for confusing yourself even more
+       ;;purescript        ; javascript, but functional
+       ;;python            ; beautiful is better than ugly
+       ;;qt                ; the 'cutest' gui framework ever
+       ;;racket            ; a DSL for DSLs
+       ;;raku              ; the artist formerly known as perl6
+       ;;rest              ; Emacs as a REST client
+       ;;rst               ; ReST in peace
+       ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+       ;;(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       ;;scala             ; java, but good
+       ;;(scheme +guile)   ; a fully conniving family of lisps
+       sh                ; she sells {ba,z,fi}sh shells on the C xor
+       ;;sml
+       ;;solidity          ; do you need a blockchain? No.
+       ;;swift             ; who asked for emoji variables?
+       ;;terra             ; Earth and Moon in alignment for performance.
+       (web +lsp)               ; the tubes
+       (yaml +lsp)              ; JSON, but readable
+       ;;zig               ; C, but simpler
+#+end_src
+
+** Email
+
+#+begin_src elisp :tangle init.el
+       :email
+       ;;(mu4e +org +gmail)
+       ;;notmuch
+       ;;(wanderlust +gmail)
+
+#+end_src
+
+** Apps
+
+#+begin_src elisp :tangle init.el
+       :app
+       ;;calendar
+       ;;emms
+       ;;everywhere        ; *leave* Emacs!? You must be joking
+       ;;irc               ; how neckbeards socialize
+       ;;(rss +org)        ; emacs as an RSS reader
+#+end_src
+
+** Config
+
+#+begin_src elisp :tangle init.el
+       :config
+       literate
+       (default +bindings +smartparens))
+#+end_src
+*** Config.el
+#+begin_src elisp :tangle config.el
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets. It is optional.
+;; (setq user-full-name "John Doe"
+;;       user-mail-address "john@doe.com")
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom:
+;;
+;; - `doom-font' -- the primary font to use
+;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
+;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;; - `doom-symbol-font' -- for symbols
+;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
+;;
+;; See 'C-h v doom-font' for documentation and more examples of what they
+;; accept. For example:
+;;
+;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+;;
+;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
+;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
+;; refresh your font settings. If Emacs still can't find your font, it likely
+;; wasn't installed correctly. Font issues are rarely Doom issues!
+
+;; There are two ways to load a theme. Both assume the theme is installed and
+;; available. You can either set `doom-theme' or manually load a theme with the
+;; `load-theme' function. This is the default:
+(setq doom-theme 'doom-one)
+
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/org/")
+
+
+;; Whenever you reconfigure a package, make sure to wrap your config in an
+;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
+;;
+;;   (after! PACKAGE
+;;     (setq x y))
+;;
+;; The exceptions to this rule:
+;;
+;;   - Setting file/directory variables (like `org-directory')
+;;   - Setting variables which explicitly tell you to set them before their
+;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
+;;   - Setting doom variables (which start with 'doom-' or '+').
+;;
+;; Here are some additional functions/macros that will help you configure Doom.
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package!' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
+;;
+;; To get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+;; This will open documentation for it, including demos of how they are used.
+;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
+;; etc).
+;;
+;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
+;; they are implemented.
+
+
+#+end_src
+
+*** Init.el
+#+begin_src elisp :tangle init.el
+
+
+
+
+
+
+
+
+#+end_src
+
+*** Packages.el
+#+begin_src elisp :tangle packages.el
+
+;; To install a package with Doom you must declare them here and run 'doom sync'
+;; on the command line, then restart Emacs for the changes to take effect -- or
+
+
+;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
+;; (package! some-package)
+
+;; To install a package directly from a remote git repo, you must specify a
+;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
+;; https://github.com/radian-software/straight.el#the-recipe-format
+;; (package! another-package
+;;   :recipe (:host github :repo "username/repo"))
+
+;; If the package you are trying to install does not contain a PACKAGENAME.el
+;; file, or is located in a subdirectory of the repo, you'll need to specify
+;; `:files' in the `:recipe':
+;; (package! this-package
+;;   :recipe (:host github :repo "username/repo"
+;;            :files ("some-file.el" "src/lisp/*.el")))
+
+;; If you'd like to disable a package included with Doom, you can do so here
+;; with the `:disable' property:
+;; (package! builtin-package :disable t)
+
+;; You can override the recipe of a built in package without having to specify
+;; all the properties for `:recipe'. These will inherit the rest of its recipe
+;; from Doom or MELPA/ELPA/Emacsmirror:
+;; (package! builtin-package :recipe (:nonrecursive t))
+;; (package! builtin-package-2 :recipe (:repo "myfork/package"))
+
+;; Specify a `:branch' to install a package from a particular branch or tag.
+;; This is required for some packages whose default branch isn't 'master' (which
+;; our package manager can't deal with; see radian-software/straight.el#279)
+;; (package! builtin-package :recipe (:branch "develop"))
+
+;; Use `:pin' to specify a particular commit to install.
+;; (package! builtin-package :pin "1a2b3c4d5e")
+
+
+;; Doom's packages are pinned to a specific commit and updated from release to
+;; release. The `unpin!' macro allows you to unpin single packages...
+;; (unpin! pinned-package)
+;; ...or multiple packages
+;; (unpin! pinned-package another-pinned-package)
+;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
+;; (unpin! t)
+
+#+end_src
