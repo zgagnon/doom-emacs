@@ -122,22 +122,24 @@ name as well to trigger updates"
                       :stream t
                       :key gptel-api-key)
       )
-(setq gptel-model 'gpt-4-1106-preview
-      gptel-backend (gptel-make-openai "OpenAI"
-                     :key gptel-api-key  ;; Replace with your actual API key
-                     :stream t
-                     :models '(gpt-4-1106-preview)))
+;; (setq gptel-model 'gpt-4-1106-preview
+;;       gptel-backend (gptel-make-openai "OpenAI"
+;;                      :key gptel-api-key  ;; Replace with your actual API key
+;;                      :stream t
+;;                      :models '(gpt-4-1106-preview)))
 (after! gptel
   ;; Set a default system prompt that applies to all gptel interactions
-  (setq gptel-default-system-prompt
+  (setq gptel-system-prompt
         "You are a programming agent inside an emacs instance. When requested to perform an action, begin by formulating a plan. Use any tools needed to in order to plan well. Present the plan and wait for confirmation. When executing a plan, use all tools needed to accomplish the task. Respond concisely, and be careful about your work.")
 
   ;; Ensure tools are enabled
   (setq gptel-use-tools t)
+  (setq gptel-use-tools '(default all))
 
   ;; Always ask for confirmation before executing tool calls
   (setq gptel-confirm-tool-calls 'ask)
 
+  (setq gptel-add-prompt-confirmation nil)
   ;; Ask whether to include tool results in the response
   (setq gptel-include-tool-results 'ask))
 
@@ -145,6 +147,56 @@ name as well to trigger updates"
 (after! gptel
   (add-to-list 'load-path "~/.doom.d/gptel-tools")
   (load "~/.doom.d/gptel-tools/gptel-tools-index.el"))
+
+(add-load-path! "mcp-hub")
+
+(require 'mcp-hub)
+
+(setq mcp-hub-servers
+      '(("filesystem" . (:command "npx":args ("-y" "@modelcontextprotocol/server-filesystem"
+                                              "/Users/zell/.doom.d"
+                                              "/Users/zell/projects/alpacka"
+                                              "/Users/zell/projects/astro"
+                                              )))
+        ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+        ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
+
+(add-hook 'after-init-hook
+          #'mcp-hub-start-all-server)
+
+(defun gptel-mcp-register-tool ()
+  (interactive)
+  (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+    (mapcar #'(lambda (tool)
+                (apply #'gptel-make-tool
+                       tool))
+            tools)))
+
+(defun gptel-mcp-use-tool ()
+  (interactive)
+  (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+    (mapcar #'(lambda (tool)
+                (let ((path (list (plist-get tool :category)
+                                  (plist-get tool :name))))
+                  (push (gptel-get-tool path)
+                        gptel-tools)))
+            tools)))
+
+(defun gptel-mcp-close-use-tool ()
+  (interactive)
+  (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+    (mapcar #'(lambda (tool)
+                (let ((path (list (plist-get tool :category)
+                                  (plist-get tool :name))))
+                  (setq gptel-tools
+                        (cl-remove-if #'(lambda (tool)
+                                          (equal path
+                                                 (list (gptel-tool-category tool)
+                                                       (gptel-tool-name tool))))
+                                      gptel-tools))))
+            tools)))
+
+(mcp-make-text-tool "filesystem" "write_file")
 
 (use-package aider
   :config
@@ -169,10 +221,6 @@ name as well to trigger updates"
   (direnv-mode 1)
   ;; Force environment reload when opening Elixir files
   (add-hook 'elixir-ts-mode-hook #'direnv-update-environment));; Make sure direnv loads before Elixir tooling
-(after! direnv
-  (direnv-mode)
-  ;; Force environment reload when opening Elixir files
-  (add-hook 'elixir-ts-mode-hook #'direnv-update-environment))
 
 ;; Ensure Elixir tools use the correct environment
 (after! lsp-mode

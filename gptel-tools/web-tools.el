@@ -7,26 +7,23 @@
 (require 'gptel)
 (require 'url-util)
 
-;; DuckDuckGo search tool using curl
+;; DuckDuckGo search tool using lynx
 (gptel-make-tool
- :name "search_duckduckgo"
+ :name "search_the_web"
  :function (lambda (query)
+             ;; Log the query being made
              (let ((url (format "https://duckduckgo.com/html/?q=%s"
                                 (url-hexify-string query)))
                    (buffer-name "*duckduckgo-results*"))
+               (message "DuckDuckGo search url: %s" url)
                ;; Create a buffer for results
                (with-current-buffer (get-buffer-create buffer-name)
                  (erase-buffer)
                  (insert (format "DuckDuckGo search results for: %s\n\n" query))
 
-                 ;; Use curl to fetch the results
-                 (let ((curl-cmd (format "curl -s \"%s\" -A \"Mozilla/5.0\"" url)))
-                   (call-process-shell-command curl-cmd nil t)
-
-                   ;; Basic HTML cleanup for readability (very simple)
-                   (goto-char (point-min))
-                   (while (re-search-forward "<[^>]*>" nil t)
-                     (replace-match " "))
+                 ;; Use lynx to fetch the results with text-based rendering
+                 (let ((lynx-cmd (format "lynx -dump -nolist \"%s\"" url)))
+                   (call-process-shell-command lynx-cmd nil t)
 
                    ;; Remove extra whitespace
                    (goto-char (point-min))
@@ -38,16 +35,16 @@
                    (display-buffer (current-buffer))
 
                    ;; Return a summary
-                   (format "DuckDuckGo search results for '%s' have been fetched using curl and added to context." query)))))
- :description "search duckduckgo for information and add results to context"
+                   (format "search results for '%s' " query)))))
+ :description "search the web for pages about aa topic"
  :args (list '(:name "query"
                :type string
-               :description "the search query to submit to duckduckgo"))
+               :description "the search query to for"))
  :category "web")
 
 ;; Tool to open a specific URL and add content to context
 (gptel-make-tool
- :name "open_url"
+ :name "read_url"
  :function (lambda (url)
              (let ((buffer-name "*url-content*"))
                ;; Create a buffer for results
@@ -55,14 +52,9 @@
                  (erase-buffer)
                  (insert (format "Content from: %s\n\n" url))
 
-                 ;; Use curl to fetch the URL content
-                 (let ((curl-cmd (format "curl -s \"%s\" -A \"Mozilla/5.0\"" url)))
-                   (call-process-shell-command curl-cmd nil t)
-
-                   ;; Basic HTML cleanup for readability
-                   (goto-char (point-min))
-                   (while (re-search-forward "<[^>]*>" nil t)
-                     (replace-match " "))
+                 ;; Use lynx to fetch the URL content
+                 (let ((lynx-cmd (format "lynx -dump -nolist \"%s\"" url)))
+                   (call-process-shell-command lynx-cmd nil t)
 
                    ;; Remove extra whitespace
                    (goto-char (point-min))
@@ -75,11 +67,11 @@
 
                    ;; Return a summary
                    (format "Content from '%s' has been fetched and added to context." url)))))
- :description "opens a specified URL and adds the content to context"
+ :description "read the contents of a url"
  :args (list '(:name "url"
                :type string
                :description "the URL to fetch content from"))
  :category "web")
 
-(provide 'gptel-tools-web)
+(provide 'web-tools)
 ;;; gptel-tools-web.el ends here

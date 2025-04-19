@@ -1,3 +1,17 @@
+
+(gptel-make-tool
+ :name "read_buffer"
+ :function (lambda (buffer)
+             (unless (buffer-live-p (get-buffer buffer))
+               (error "Error: buffer %s is not live." buffer))
+             (with-current-buffer buffer
+               (buffer-substring-no-properties (point-min) (point-max))))
+ :description "return the contents of an emacs buffer"
+ :args (list '(:name "buffer"
+               :type string
+               :description "the name of the buffer whose contents are to be retrieved"))
+ :category "emacs")
+
 (gptel-make-tool
  :name "edit_buffer"                    ; javascript-style snake_case name
  :function (lambda (buffer content replace-all)  ; the function that will run
@@ -23,4 +37,4 @@
                :description "if true, replace entire buffer content; if false, insert at point"))
  :category "emacs")                     ; An arbitrary label for grouping
 
-(provide 'gptel-edit-buffer)
+(provide 'buffer-tools)

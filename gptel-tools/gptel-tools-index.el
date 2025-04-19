@@ -5,14 +5,11 @@
 
 ;;; Code:
 (require 'gptel)
-(require 'gptel-tools-buffer)
-(require 'gptel-tools-web)
-(require 'gptel-tools-file)
-(require 'gptel-tools-search)
-(require 'gptel-tools-directory)
-(require 'gptel-tools-move)
-(require 'gptel-langchain)
-(require 'gptel-open-file)
+;; (require 'buffer-tools)
+;; (require 'file-tools)
+(require 'web-tools)
+(require 'search-tools)
+(require 'project-tools)
 
 (defun gptel-tool-langchain-run (chain-name input)
   "Run a defined langchain CHAIN-NAME with INPUT."
