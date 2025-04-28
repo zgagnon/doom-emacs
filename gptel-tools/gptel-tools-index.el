@@ -12,5 +12,10 @@
 (require 'project-tools)
 (require 'elisp-tools)
 
+;; Mode-specific tools
+(require 'mode-specific-tools)
+(require 'org-mode-tools)
+(require 'programming-tools)
+
 (provide 'gptel-tools-index)
 ;;; gptel-tools-index.el ends here

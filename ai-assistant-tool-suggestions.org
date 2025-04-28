@@ -6,7 +6,7 @@
 
 1. ✅ *Evaluate Elisp Code*: A tool to evaluate Emacs Lisp expressions directly. This would allow me to execute Emacs commands and customize behavior on demand.
 
-2. *Buffer Management*: Tools to list, switch between, and manipulate Emacs buffers, allowing me to help navigate complex projects.
+2. ✅ *Buffer Management*: Tools to list, switch between, and manipulate Emacs buffers, allowing me to help navigate complex projects.
 
 3. *Keymap Binding*: Ability to create, modify, or suggest keybindings to improve workflow efficiency.
 
