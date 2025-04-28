@@ -39,6 +39,15 @@
   :group 'mcp
   :type 'integer)
 
+(defcustom mcp-server-wait-initial-time 2
+  "Seconds to wait after server init before fetching MCP resources.
+
+This delay is applied after server initialization completes, but
+before requesting tools, prompts and resources. Gives the server
+time to fully initialize all components before handling requests."
+  :group 'mcp
+  :type 'integer)
+
 (defcustom mcp-log-level 'info
   "The min log level for mcp server.
 Available levels:
@@ -217,6 +226,13 @@ The message is sent differently based on connection type:
                    (if endpoint-waitp
                        (setf (mcp--endpoint conn) json-str)
                      (push (cons index json-str) parsed-messages)
+                     (cl-incf index)))))
+              ((not (string= buf ""))
+               (let ((json-str (string-trim line)))
+                 (unless (string-empty-p json-str)
+                   (if endpoint-waitp
+                       (setf (mcp--endpoint conn) json-str)
+                     (push (cons index json-str) parsed-messages)
                      (cl-incf index)))))))
             ('stdio
              (let ((json-str (string-trim line)))
@@ -236,7 +252,8 @@ The message is sent differently based on connection type:
                                                 :false-object :json-false))
                 (error
                  ;; If the last data parsing fails, it may be due to incomplete data transmission.
-                 (when (not (= index (- (length parsed-messages) 1)))
+                 (when (or (not (process-get proc 'jsonrpc-pending))
+                           (not (= index (- (length parsed-messages) 1))))
                    (jsonrpc--warn "Invalid JSON: %s %s"
                                   (cdr err) json-str))
                  (if (string-prefix-p "{" json-str)
@@ -246,6 +263,7 @@ The message is sent differently based on connection type:
                    ;; server might be sending bogus data, we can ignore it
                    (message "parse error"))))
               (when json
+                (process-put proc 'jsonrpc-pending nil)
                 (setq json (plist-put json :jsonrpc-json json-str))
                 (push json queue)))))
 
@@ -490,15 +508,19 @@ in the `mcp-server-connections` hash table for future reference."
                                   (mcp-async-set-log-level connection mcp-log-level))
                                 (when initial-callback
                                   (funcall initial-callback connection))
-                                ;; Get prompts
-                                (when (plist-member capabilities :prompts)
-                                  (mcp-async-list-prompts connection prompts-callback))
-                                ;; Get tools
-                                (when (plist-member capabilities :tools)
-                                  (mcp-async-list-tools connection tools-callback))
-                                ;; Get resources
-                                (when (plist-member capabilities :resources)
-                                  (mcp-async-list-resources connection resources-callback))
+                                (run-with-idle-timer mcp-server-wait-initial-time
+                                                     nil
+                                                     #'(lambda ()
+                                                         ;; Get prompts
+                                                         (when (plist-member capabilities :prompts)
+                                                           (mcp-async-list-prompts connection prompts-callback))
+                                                         ;; Get tools
+                                                         (when (plist-member capabilities :tools)
+                                                           (mcp-async-list-tools connection tools-callback))
+                                                         ;; Get resources
+                                                         (when (plist-member capabilities :resources)
+                                                           (mcp-async-list-resources connection resources-callback)))
+                                                     )
                                 (setf (mcp--status connection)
                                       'connected))
                             (progn
@@ -674,8 +696,8 @@ On error, displays an error message with the server's response code and message.
                          #'(lambda (res)
                              (message "[mcp] setLevel success: %s" res))
                          :error-fn (jsonrpc-lambda (&key code message _data)
-                                                   (message "Sadly, mpc server reports %s: %s"
-                                                            code message))))
+                                     (message "Sadly, mpc server reports %s: %s"
+                                              code message))))
 
 (defun mcp-async-ping (connection)
   "Send an asynchronous ping request to the MCP server via CONNECTION.
@@ -690,8 +712,8 @@ On error, it displays an error message with the code from the server."
                          #'(lambda (res)
                              (message "[mcp] ping success: %s" res))
                          :error-fn (jsonrpc-lambda (&key code message _data)
-                                                   (message "Sadly, mpc server reports %s: %s"
-                                                            code message))))
+                                     (message "Sadly, mpc server reports %s: %s"
+                                              code message))))
 
 (defun mcp-async-initialize-message (connection callback &optional error-callback)
   "Sending an `initialize' request to the CONNECTION.
@@ -713,10 +735,10 @@ with the client's capabilities and version information."
                                (funcall callback protocolVersion serverInfo capabilities)))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (if error-callback
-                                             (funcall error-callback code message)
-                                           (message "Sadly, mpc server reports %s: %s"
-                                                    code message)))))
+                           (if error-callback
+                               (funcall error-callback code message)
+                             (message "Sadly, mpc server reports %s: %s"
+                                      code message)))))
 
 (defun mcp-async-list-tools (connection &optional callback error-callback)
   "Get a list of tools from the MCP server using the provided CONNECTION.
@@ -739,10 +761,10 @@ The result is stored in the `mcp--tools' slot of the CONNECTION object."
                                  (funcall callback connection tools))))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (if error-callback
-                                             (funcall error-callback code message)
-                                           (message "Sadly, mpc server reports %s: %s"
-                                                    code message)))))
+                           (if error-callback
+                               (funcall error-callback code message)
+                             (message "Sadly, mpc server reports %s: %s"
+                                      code message)))))
 
 (defun mcp-call-tool (connection name arguments)
   "Call a tool on the remote CONNECTION with NAME and ARGUMENTS.
@@ -776,7 +798,7 @@ ERROR-CALLBACK is a function to call on error."
                              (funcall callback res))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (funcall error-callback code message))))
+                           (funcall error-callback code message))))
 
 (defun mcp-async-list-prompts (connection &optional callback error-callback)
   "Get list of prompts from the MCP server using the provided CONNECTION.
@@ -799,10 +821,10 @@ The result is stored in the `mcp--prompts' slot of the CONNECTION object."
                                  (funcall callback connection prompts))))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (if error-callback
-                                             (funcall error-callback code message)
-                                           (message "Sadly, mpc server reports %s: %s"
-                                                    code message)))))
+                           (if error-callback
+                               (funcall error-callback code message)
+                             (message "Sadly, mpc server reports %s: %s"
+                                      code message)))))
 
 (defun mcp-get-prompt (connection name arguments)
   "Call a prompt on the remote CONNECTION with NAME and ARGUMENTS.
@@ -836,7 +858,7 @@ ERROR-CALLBACK is a function to call on error."
                              (funcall callback res))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (funcall error-callback code message))))
+                           (funcall error-callback code message))))
 
 (defun mcp-async-list-resources (connection &optional callback error-callback)
   "Get list of resources from the MCP server using the provided CONNECTION.
@@ -858,10 +880,10 @@ The result is stored in the `mcp--resources' slot of the CONNECTION object."
                                  (funcall callback connection resources))))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (if error-callback
-                                             (funcall error-callback code message)
-                                           (message "Sadly, mpc server reports %s: %s"
-                                                    code message)))))
+                           (if error-callback
+                               (funcall error-callback code message)
+                             (message "Sadly, mpc server reports %s: %s"
+                                      code message)))))
 (defun mcp-read-resource (connection uri)
   "Call a resource on the remote CONNECTION with URI.
 
@@ -890,7 +912,7 @@ succeeds, or ERROR-CALLBACK if it fails."
                              (funcall callback res))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (funcall error-callback code message))))
+                           (funcall error-callback code message))))
 
 (defun mcp-async-list-resource-templates (connection &optional callback error-callback)
   "Get list of resource templates from the MCP server using the CONNECTION.
@@ -908,10 +930,10 @@ function to call if an error occurs during the request."
                                  (funcall callback connection resourceTemplates))))
                          :error-fn
                          (jsonrpc-lambda (&key code message _data)
-                                         (if error-callback
-                                             (funcall error-callback code message)
-                                           (message "Sadly, mpc server reports %s: %s"
-                                                    code message)))))
+                           (if error-callback
+                               (funcall error-callback code message)
+                             (message "Sadly, mpc server reports %s: %s"
+                                      code message)))))
 
 (provide 'mcp)
 ;;; mcp.el ends here

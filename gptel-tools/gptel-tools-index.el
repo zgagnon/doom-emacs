@@ -5,19 +5,12 @@
 
 ;;; Code:
 (require 'gptel)
-;; (require 'buffer-tools)
+(require 'buffer-tools)
 ;; (require 'file-tools)
 (require 'web-tools)
 (require 'search-tools)
 (require 'project-tools)
+(require 'elisp-tools)
 
-(defun gptel-tool-langchain-run (chain-name input)
-  "Run a defined langchain CHAIN-NAME with INPUT."
-  (gptel-langchain-run-chain chain-name input))
-
-;; Open file tool interface
-(defun gptel-tool-open-file (filepath)
-  "Open FILEPATH in a buffer and return its buffer name."
-  (gptel-open-file filepath))
 (provide 'gptel-tools-index)
 ;;; gptel-tools-index.el ends here
