@@ -10,7 +10,7 @@
 
 3. *Keymap Binding*: Ability to create, modify, or suggest keybindings to improve workflow efficiency.
 
-4. *Mode-Specific Operations*: Functions to detect the current major/minor modes and provide context-aware assistance.
+4. oMode-Specific Operations*: Functions to detect the current major/minor modes and provide context-aware assistance.
 
 5. *Command History*: Access to command history to learn from user patterns and suggest improvements.
 

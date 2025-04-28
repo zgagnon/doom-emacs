@@ -130,7 +130,16 @@ name as well to trigger updates"
 (after! gptel
   ;; Set a default system prompt that applies to all gptel interactions
   (setq gptel-system-prompt
-        "You are a programming agent inside an emacs instance. When requested to perform an action, begin by formulating a plan. Use any tools needed to in order to plan well. Present the plan and wait for confirmation. When executing a plan, use all tools needed to accomplish the task. Respond concisely, and be careful about your work.")
+        "You are a programming agent inside an emacs instance. When requested to perform an action, begin by formulating a plan. Use any tools needed to in order to plan well. Present the plan and wait for confirmation. When executing a plan, use all tools needed to accomplish the task. Respond concisely, and be careful about your work. Since you are in an emacs, prefer to open files in buffers then edit them there. Respond concisely, and be careful about your work.")
+  (setq gptel-directives
+        '((default . "You are a programming agent inside an emacs instance. When requested to perform an action, begin by formulating a plan. Use any tools needed to in order to plan well. Present the plan and wait for confirmation. When executing a plan, use all tools needed to accomplish the task. Since you are in an emacs, prefer to open files in buffers then edit them there. Respond concisely, and be careful about your work.")
+          (creative . "You are a creative writing assistant who helps craft imaginative and engaging content. Be colorful and descriptive in your language.")
+          (technical . "You are a technical documentation expert. Provide clear, precise explanations with examples when appropriate. Focus on accuracy and clarity.")
+          (teacher . "You are a patient teacher explaining concepts in simple terms. Use analogies and break down complex ideas into understandable parts.")
+          (debugger . "You are a debugging expert. Your job is to analyze code problems methodically, identify likely causes, and suggest specific fixes with explanations.")))
+
+  ;; Set the default directive to use
+  (setq gptel-system-prompt (alist-get 'default gptel-directives))
 
   ;; Ensure tools are enabled
   (setq gptel-use-tools t)
@@ -155,8 +164,7 @@ name as well to trigger updates"
 (setq mcp-hub-servers
       '(("filesystem" . (:command "npx":args ("-y" "@modelcontextprotocol/server-filesystem"
                                               "/Users/zell/.doom.d"
-                                              "/Users/zell/projects/alpacka"
-                                              "/Users/zell/projects/astro"
+                                              "/Users/zell/projects/"
                                               )))
         ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
         ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
@@ -217,12 +225,7 @@ name as well to trigger updates"
 ;;   (global-treesit-auto-mode))
 
 ;; Make sure direnv loads properly with Elixir
-(after! direnv
-  (direnv-mode 1)
-  ;; Force environment reload when opening Elixir files
-  (add-hook 'elixir-ts-mode-hook #'direnv-update-environment));; Make sure direnv loads before Elixir tooling
 
-;; Ensure Elixir tools use the correct environment
 (after! lsp-mode
   (add-hook 'elixir-ts-mode-hook #'lsp))
 
@@ -241,6 +244,8 @@ name as well to trigger updates"
          )))
 
 (use-package! lsp-tailwindcss)
+
+(load! "lisp-formatting")
 
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!

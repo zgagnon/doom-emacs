@@ -14,28 +14,33 @@
              ;; Log the query being made
              (let ((url (format "https://duckduckgo.com/html/?q=%s"
                                 (url-hexify-string query)))
-                   (buffer-name "*duckduckgo-results*"))
+                   (buffer-name "*duckduckgo-results*")
+                   (urls-found nil))
                (message "DuckDuckGo search url: %s" url)
                ;; Create a buffer for results
                (with-current-buffer (get-buffer-create buffer-name)
                  (erase-buffer)
                  (insert (format "DuckDuckGo search results for: %s\n\n" query))
 
-                 ;; Use lynx to fetch the results with text-based rendering
-                 (let ((lynx-cmd (format "lynx -dump -nolist \"%s\"" url)))
+                 ;; Use lynx to fetch the results and show links
+                 (let ((lynx-cmd (format "lynx -dump \"%s\"" url)))
                    (call-process-shell-command lynx-cmd nil t)
-
-                   ;; Remove extra whitespace
+                   
+                   ;; Extract URLs from the lynx output
                    (goto-char (point-min))
-                   (while (re-search-forward "\\s-+" nil t)
-                     (replace-match " "))
-
+                   (while (re-search-forward "^ *\\([0-9]+\\)\\.\\s-*\\(https?://[^\n]+\\)" nil t)
+                     (push (match-string 2) urls-found))
+                   
                    ;; Add the buffer to gptel context
                    (gptel-add (current-buffer))
                    (display-buffer (current-buffer))
 
-                   ;; Return a summary
-                   (format "search results for '%s' " query)))))
+                   ;; Return a summary with all found URLs
+                   (if urls-found
+                       (format "Search results for '%s':\n%s" 
+                               query
+                               (mapconcat 'identity (reverse urls-found) "\n"))
+                     (format "Search results for '%s' (no URLs found)" query))))))
  :description "search the web for pages about aa topic"
  :args (list '(:name "query"
                :type string

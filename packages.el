@@ -4,7 +4,7 @@
 
 (package! catppuccin-theme)
 
-(package! gptel)
+(package! gptel :recipe (:local-repo "~/.doom.d/gptel"))
 
 (package! aider :recipe (:host github :repo "tninja/aider.el" :files ("*.el")))
 
