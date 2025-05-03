@@ -25,8 +25,9 @@
   :group 'gptel
   :prefix "gptel-adr-")
 
-(defcustom gptel-adr-directory (expand-file-name "docs/adr" (projectile-project-root))
-  "Directory to store Architectural Decision Records."
+(defcustom gptel-adr-directory nil
+  "Directory to store Architectural Decision Records.
+  This will always be set to 'docs/adr' in the current projectile project root."
   :group 'gptel-adr
   :type 'directory)
 
@@ -64,10 +65,12 @@ The template is a format string where:
 ;;; Internal functions
 
 (defun gptel-adr--ensure-directory ()
-  "Ensure the ADR directory exists."
-  (unless (file-exists-p gptel-adr-directory)
-    (make-directory gptel-adr-directory t))
-  gptel-adr-directory)
+  "Ensure the ADR directory exists and return the path.
+  Always uses 'docs/adr' in the current projectile project root."
+  (let ((dir (expand-file-name "docs/adr" (projectile-project-root))))
+    (unless (file-exists-p dir)
+      (make-directory dir t))
+    dir))
 
 (defun gptel-adr--get-all-adrs ()
   "Get a list of all ADR files sorted by number."
