@@ -17,5 +17,8 @@
 (require 'org-mode-tools)
 (require 'programming-tools)
 
+;; Documentation tools
+(require 'adr-tools)
+
 (provide 'gptel-tools-index)
 ;;; gptel-tools-index.el ends here
