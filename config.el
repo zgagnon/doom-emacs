@@ -165,6 +165,7 @@ name as well to trigger updates"
                                               "/Users/zell/projects/"
                                               )))
         ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+        ("web-access" . (:command "npx" :args ("-y" "github:zgagnon/web-mcp") ))
         ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
 
 (add-hook 'after-init-hook

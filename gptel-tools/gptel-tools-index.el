@@ -7,7 +7,7 @@
 (require 'gptel)
 (require 'buffer-tools)
 ;; (require 'file-tools)
-(require 'web-tools)
+;; (require 'web-tools)
 (require 'search-tools)
 (require 'project-tools)
 (require 'elisp-tools)
