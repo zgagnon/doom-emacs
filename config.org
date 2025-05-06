@@ -350,48 +350,58 @@ name as well to trigger updates"
 (require 'mcp-hub)
 
 (setq mcp-hub-servers
-      '(("filesystem" . (:command "npx":args ("-y" "@modelcontextprotocol/server-filesystem"
-                                              "/Users/zell/.doom.d"
-                                              "/Users/zell/projects/"
-                                              )))
-        ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
-        ("web-access" . (:command "npx" :args ("-y" "github:zgagnon/web-mcp") ))
-        ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
+  '(("filesystem" . (:command "npx":args ("-y" "@modelcontextprotocol/server-filesystem"
+                                           "/Users/zell/.doom.d"
+                                           "/Users/zell/projects/"
+                                           )))
+     ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+     ("web-access" . (:command "npx" :args ("-y" "github:zgagnon/web-mcp") ))
+     ("text-editor" . (:command "uvx" :args ("mcp-text-editor")))
+     ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
 
 (add-hook 'after-init-hook
-          #'mcp-hub-start-all-server)
+  #'mcp-hub-start-all-server)
 
 (defun gptel-mcp-register-tool ()
   (interactive)
   (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
     (mapcar #'(lambda (tool)
                 (apply #'gptel-make-tool
-                       tool))
-            tools)))
+                  tool))
+      tools)))
 
 (defun gptel-mcp-use-tool ()
   (interactive)
   (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
     (mapcar #'(lambda (tool)
                 (let ((path (list (plist-get tool :category)
-                                  (plist-get tool :name))))
+                              (plist-get tool :name))))
                   (push (gptel-get-tool path)
-                        gptel-tools)))
-            tools)))
+                    gptel-tools)))
+      tools)))
 
 (defun gptel-mcp-close-use-tool ()
   (interactive)
   (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
     (mapcar #'(lambda (tool)
                 (let ((path (list (plist-get tool :category)
-                                  (plist-get tool :name))))
+                              (plist-get tool :name))))
                   (setq gptel-tools
-                        (cl-remove-if #'(lambda (tool)
-                                          (equal path
-                                                 (list (gptel-tool-category tool)
-                                                       (gptel-tool-name tool))))
-                                      gptel-tools))))
-            tools)))
+                    (cl-remove-if #'(lambda (tool)
+                                      (equal path
+                                        (list (gptel-tool-category tool)
+                                          (gptel-tool-name tool))))
+                      gptel-tools))))
+      tools)))
+
+;; Add MCP hub keybindings under leader r p
+(map! :leader
+  (:prefix ("r" . "robot chat")
+    (:prefix ("p" . "MCP Hub")
+      :desc "Open MCP Hub" "h" #'mcp-hub
+      :desc "Register MCP tools with GPTel" "g" #'gptel-mcp-register-tool
+      :desc "Show logs for MCP server" "l" #'mcp-hub-view-log
+      :desc "Restart MCP server" "r" #'mcp-hub-restart-server)))
 
 (mcp-make-text-tool "filesystem" "write_file")
 #+end_src
@@ -704,7 +714,7 @@ Configure extra packages
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'catppuccin)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
