@@ -349,11 +349,21 @@ name as well to trigger updates"
 
 (require 'mcp-hub)
 
+(defun mcp-discover-projects ()
+  "Return a list of all directories under /Users/zell/projects.
+This explicitly excludes /Users/zell and /Users/zell/projects directories themselves."
+  (let ((project-dirs '()))
+    ;; Get all directories under /Users/zell/projects
+    (dolist (dir (directory-files "/Users/zell/projects" t))
+      (when (and (file-directory-p dir)
+                 (not (string-match-p "/\\.$" dir))
+                 (not (string-match-p "/\\.\\.$" dir)))
+        (push dir project-dirs)))
+    project-dirs))
+
 (setq mcp-hub-servers
-  '(("filesystem" . (:command "npx":args ("-y" "@modelcontextprotocol/server-filesystem"
-                                           "/Users/zell/.doom.d"
-                                           "/Users/zell/projects/"
-                                           )))
+  `(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem"
+                                          ,@(mcp-discover-projects))))
      ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
      ("web-access" . (:command "npx" :args ("-y" "github:zgagnon/web-mcp") ))
      ("text-editor" . (:command "uvx" :args ("mcp-text-editor")))
