@@ -22,6 +22,7 @@
 ** [[OS]]
 ** [[Lang]]
 *** [[Elixir]]
+*** [[Rust]]
 *** [[Just]]
 *** [[CSV]]
 *** [[Tailwind]]
@@ -505,17 +506,17 @@ Interact with Aider via Emacs
 *** Treesitter
 
 #+begin_src elisp :tangle packages.el
-;; (package! treesit-auto)
-;; (package! evil-textobj-tree-sitter)
+(package! treesit-auto)
+(package! evil-textobj-tree-sitter)
 #+end_src
 
 #+begin_src elisp :tangle config.el
-;; (use-package! treesit-auto
-;;   :custom
-;;   (treesit-auto-install 'prompt)
-;;   :config
-;;   (treesit-auto-add-to-auto-mode-alist 'all)
-;;   (global-treesit-auto-mode))
+(use-package! treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 #+end_src
 ** OS
@@ -579,6 +580,15 @@ Configure extra packages
          :desc "Rerun the last test with debugging" "d" #'exunit-debug
          :desc "Toggle between file and test" "t" #'exunit-toggle-file-and-test
          )))
+#+end_src
+*** Rust
+
+#+begin_src elisp :tangle config.el
+(setq treesit-language-source-alist
+      (append treesit-language-source-alist
+              '((rust "https://github.com/tree-sitter/tree-sitter-rust"))))
+
+(add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
 #+end_src
 *** Just
 

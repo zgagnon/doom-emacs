@@ -8,8 +8,8 @@
 
 (package! aider :recipe (:host github :repo "tninja/aider.el" :files ("*.el")))
 
-;; (package! treesit-auto)
-;; (package! evil-textobj-tree-sitter)
+(package! treesit-auto)
+(package! evil-textobj-tree-sitter)
 
 (package! exunit)
 (package! flycheck-credo)

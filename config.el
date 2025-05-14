@@ -236,12 +236,12 @@ This explicitly excludes /Users/zell and /Users/zell/projects directories themse
 (setq gc-cons-threshold 100000000)
 (setq lsp-idle-delay 0.5)
 
-;; (use-package! treesit-auto
-;;   :custom
-;;   (treesit-auto-install 'prompt)
-;;   :config
-;;   (treesit-auto-add-to-auto-mode-alist 'all)
-;;   (global-treesit-auto-mode))
+(use-package! treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 ;; Make sure direnv loads properly with Elixir
 
@@ -261,6 +261,12 @@ This explicitly excludes /Users/zell and /Users/zell/projects directories themse
          :desc "Rerun the last test with debugging" "d" #'exunit-debug
          :desc "Toggle between file and test" "t" #'exunit-toggle-file-and-test
          )))
+
+(setq treesit-language-source-alist
+      (append treesit-language-source-alist
+              '((rust "https://github.com/tree-sitter/tree-sitter-rust"))))
+
+(add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
 
 (use-package! lsp-tailwindcss)
 
