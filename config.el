@@ -159,17 +159,44 @@ name as well to trigger updates"
 
 (require 'mcp-hub)
 
+(defvar mcp-search-root-directories
+  (list (expand-file-name "~/")
+        (expand-file-name "~/.doom.d/"))
+  "List of root directories to search for git/jj repositories.")
+
 (defun mcp-discover-projects ()
-  "Return a list of all directories under /Users/zell/projects.
-This explicitly excludes /Users/zell and /Users/zell/projects directories themselves."
-  (let ((project-dirs '()))
-    ;; Get all directories under /Users/zell/projects
-    (dolist (dir (directory-files "/Users/zell/projects" t))
-      (when (and (file-directory-p dir)
-                 (not (string-match-p "/\\.$" dir))
-                 (not (string-match-p "/\\.\\.$" dir)))
-        (push dir project-dirs)))
-    project-dirs))
+  "Return a list of directories containing git/jj repositories using fd."
+  (let ((project-dirs '())
+        (excluded-dirs '(".Trash" ".cache" "Library" ".local" "Applications" "Music" "Movies" "Pictures")))
+
+    ;; Search through each specified root directory
+    (dolist (root-dir mcp-search-root-directories)
+      (when (file-directory-p root-dir)
+        ;; Check if the root itself is a git/jj repo
+        (if (or (file-exists-p (expand-file-name ".git" root-dir))
+                (file-exists-p (expand-file-name ".jj" root-dir)))
+            (push root-dir project-dirs))
+
+        ;; Search for all non-excluded directories under this root
+        (dolist (dir (directory-files root-dir t))
+          (when (and (file-directory-p dir)
+                     (not (member (file-name-nondirectory dir) excluded-dirs))
+                     (not (string-match-p "/\\." (file-name-directory dir))))
+            ;; Check if this is a git/jj repo
+            (if (or (file-exists-p (expand-file-name ".git" dir))
+                    (file-exists-p (expand-file-name ".jj" dir)))
+                (push dir project-dirs)
+              ;; Use fd to find repositories in this directory
+              (when-let* ((default-directory dir)
+                          (fd-available (executable-find "fd"))
+                          (cmd (concat "fd -H -t d -E .Trash -E node_modules -E .cargo "
+                                      "'^\\.(git|jj)$' --max-depth 4 -x dirname {} | xargs realpath"))
+                          (repos (ignore-errors
+                                   (split-string (shell-command-to-string cmd) "\n" t))))
+                (setq project-dirs (append repos project-dirs))))))))
+
+    ;; Make sure all paths are absolute
+    (mapcar #'expand-file-name project-dirs)))
 
 (setq mcp-hub-servers
   `(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem"
@@ -249,7 +276,7 @@ This explicitly excludes /Users/zell and /Users/zell/projects directories themse
   (add-hook 'elixir-ts-mode-hook #'lsp))
 
 (after! elixir-ts-mode
-  (lsp)  ; Activate LSP when elixir-ts-mode is active
+  (add-hook 'elixir-ts-mode-hook #'lsp)  ; Activate LSP when elixir-ts-mode is active
   (map! :map elixir-ts-mode-map
         :leader
         (:prefix ("m t" . "Exunit tests")
