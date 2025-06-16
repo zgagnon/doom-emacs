@@ -161,46 +161,45 @@ name as well to trigger updates"
 
 (defvar mcp-search-root-directories
   (list (expand-file-name "~/")
-        (expand-file-name "~/.doom.d/"))
+    (expand-file-name "~/.doom.d/"))
   "List of root directories to search for git/jj repositories.")
 
-(defun mcp-discover-projects ()
-  "Return a list of directories containing git/jj repositories using fd."
-  (let ((project-dirs '())
-        (excluded-dirs '(".Trash" ".cache" "Library" ".local" "Applications" "Music" "Movies" "Pictures")))
+;; (defun mcp-discover-projects ()
+;;   "Return a list of directories containing git/jj repositories using fd."
+;;   (let ((project-dirs '())
+;;          (excluded-dirs '(".Trash" ".cache" "Library" ".local" "Applications" "Music" "Movies" "Pictures")))
 
-    ;; Search through each specified root directory
-    (dolist (root-dir mcp-search-root-directories)
-      (when (file-directory-p root-dir)
-        ;; Check if the root itself is a git/jj repo
-        (if (or (file-exists-p (expand-file-name ".git" root-dir))
-                (file-exists-p (expand-file-name ".jj" root-dir)))
-            (push root-dir project-dirs))
+;;     ;; Search through each specified root directory
+;;     (dolist (root-dir mcp-search-root-directories)
+;;       (when (file-directory-p root-dir)
+;;         ;; Check if the root itself is a git/jj repo
+;;         (if (or (file-exists-p (expand-file-name ".git" root-dir))
+;;               (file-exists-p (expand-file-name ".jj" root-dir)))
+;;           (push root-dir project-dirs))
 
-        ;; Search for all non-excluded directories under this root
-        (dolist (dir (directory-files root-dir t))
-          (when (and (file-directory-p dir)
-                     (not (member (file-name-nondirectory dir) excluded-dirs))
-                     (not (string-match-p "/\\." (file-name-directory dir))))
-            ;; Check if this is a git/jj repo
-            (if (or (file-exists-p (expand-file-name ".git" dir))
-                    (file-exists-p (expand-file-name ".jj" dir)))
-                (push dir project-dirs)
-              ;; Use fd to find repositories in this directory
-              (when-let* ((default-directory dir)
-                          (fd-available (executable-find "fd"))
-                          (cmd (concat "fd -H -t d -E .Trash -E node_modules -E .cargo "
-                                      "'^\\.(git|jj)$' --max-depth 4 -x dirname {} | xargs realpath"))
-                          (repos (ignore-errors
-                                   (split-string (shell-command-to-string cmd) "\n" t))))
-                (setq project-dirs (append repos project-dirs))))))))
+;;         ;; Search for all non-excluded directories under this root
+;;         (dolist (dir (directory-files root-dir t))
+;;           (when (and (file-directory-p dir)
+;;                   (not (member (file-name-nondirectory dir) excluded-dirs))
+;;                   (not (string-match-p "/\\." (file-name-directory dir))))
+;;             ;; Check if this is a git/jj repo
+;;             (if (or (file-exists-p (expand-file-name ".git" dir))
+;;                   (file-exists-p (expand-file-name ".jj" dir)))
+;;               (push dir project-dirs)
+;;               ;; Use fd to find repositories in this directory
+;;               (when-let* ((default-directory dir)
+;;                            (fd-available (executable-find "fd"))
+;;                            (cmd (concat "fd -H -t d -E .Trash -E node_modules -E .cargo "
+;;                                   "'^\\.(git|jj)$' --max-depth 4 -x dirname {} | xargs realpath"))
+;;                            (repos (ignore-errors
+;;                                     (split-string (shell-command-to-string cmd) "\n" t))))
+;;                 (setq project-dirs (append repos project-dirs))))))))
 
-    ;; Make sure all paths are absolute
-    (mapcar #'expand-file-name project-dirs)))
+;;     ;; Make sure all paths are absolute
+;;     (mapcar #'expand-file-name project-dirs)))
 
 (setq mcp-hub-servers
-  `(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem"
-                                          ,@(mcp-discover-projects))))
+  `(("filesystem" . (:command "nix" :args ("run" "github:zgagnon/mcp-collection#filesystem" "/Users/zell/git/" "/Users/zell/.doom.d"))      )
      ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
      ("web-access" . (:command "npx" :args ("-y" "github:zgagnon/web-mcp") ))
      ("text-editor" . (:command "uvx" :args ("mcp-text-editor")))
