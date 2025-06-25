@@ -145,7 +145,11 @@ name as well to trigger updates"
 ;; other persp-mode related configuration
 )
 
+;; Load startup profiling
+(load! "startup-profiling")
+
 (setq auth-sources '((:source "~/.authinfo")))
+(setq gptel-log-level 'info)
 
 (use-package! gptel)
 
@@ -200,33 +204,94 @@ name as well to trigger updates"
   ;; Ask whether to include tool results in the response
   (setq gptel-include-tool-results 'ask)
 
-  ;; Presets
-  (gptel-make-preset "nix-developer"
-    :system "You are a nix developer, particularly tasked with packaging applications. You are careful, double checking packaging best-practices in each language you work with, and testing to make sure your packages always build. You are part of a pair, working with the user to form the best approach. You work incrementally, presenting the user with various alternatives and seeking feedback on design."
-    :model 'claude-sonnet-4-20250514
-    :temperature 0.1
-    :tools (list
-             ;; All web search (Nix tools not available in current setup)
-             "search_duckduckgo" "read_url"
-             ;; Sequential reasoning
-             "sequentialthinking"
-             ;; All filesystem
-             "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
-             "list_directory" "list_allowed_directories" "directory_tree" "search_files"
-             "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
-             ;; All emacs mode
-             "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
-             ;; All emacs repl
-             "evaluate_elisp" "evaluate_elisp_in_buffer"
-             ;; All user interaction
-             "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
+;; Presets
+(gptel-make-preset "nix-developer"
+  :system "You are a nix developer, particularly tasked with packaging applications. You are careful, double checking packaging best-practices in each language you work with, and testing to make sure your packages always build. You are part of a pair, working with the user to form the best approach. You work incrementally, presenting the user with various alternatives and seeking feedback on design."
+  :model 'claude-sonnet-4-20250514
+  :temperature 0.1
+  :tools (list
+           ;; All web search (Nix tools not available in current setup)
+           "search_duckduckgo" "read_url"
+           ;; Sequential reasoning
+           "sequentialthinking"
+           ;; All filesystem
+           "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
+           "list_directory" "list_allowed_directories" "directory_tree" "search_files"
+           "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
+           ;; All emacs mode
+           "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
+           ;; All emacs repl
+           "evaluate_elisp" "evaluate_elisp_in_buffer"
+           ;; All user interaction
+           "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
 
+(gptel-make-preset "emacs-llm-developer"
+  :system "You are a developer helping to build llm tooling into emacs. Create tests for functionality, and examine the emacs state to ensure tools are working as we intend. You are part of a pair, and should ask the user for preferences, for help deciding between different approaches, and for feedback on designs."
+  :model 'claude-sonnet-4-20250514
+  :temperature 0.1
+  :tools (list
+           ;; All web search
+           "search_duckduckgo" "read_url"
+           ;; Sequential reasoning
+           "sequentialthinking"
+           ;; All filesystem
+           "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
+           "list_directory" "list_allowed_directories" "directory_tree" "search_files"
+           "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
+           ;; All emacs mode
+           "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
+           ;; All emacs repl
+           "evaluate_elisp" "evaluate_elisp_in_buffer"
+           ;; All user interaction
+           "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
 
-  (gptel-make-preset "emacs-llm-developer"
-    :system "You are a developer helping to build llm tooling into emacs. Create tests for functionality, and examine the emacs state to ensure tools are working as we intend. You are part of a pair, and should ask the user for preferences, for help deciding between different approaches, and for feedback on designs."
-    :model 'claude-sonnet-4-20250514
-    :temperature 0.1
-    :tools (list
+(gptel-make-preset "software-developer"
+  :system "You are a developer helping to build applications. You are part of a pair, and should ask the user for preferences, for help deciding between different approaches, and for feedback on designs."
+  :model 'claude-sonnet-4-20250514
+  :temperature 0.1
+  :tools (list
+           ;; All web search
+           "search_duckduckgo" "read_url"
+           ;; Sequential reasoning
+           "sequentialthinking"
+           ;; All filesystem
+           "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
+           "list_directory" "list_allowed_directories" "directory_tree" "search_files"
+           "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
+           ;; All emacs mode
+           "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
+           ;; All emacs repl
+           "evaluate_elisp" "evaluate_elisp_in_buffer"
+           ;; All user interaction
+           "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
+
+(gptel-make-preset "product manager"
+  :system "You are a product manager helping to plan software development. Research problem domains and available tools and libraries, and break down problems into a sequence of steps. Favor producing user stories and acceptance criteria rather than code"
+  :model 'claude-sonnet-4-20250514
+  :temperature 0.5
+  :tools (list
+           ;; All web search
+           "search_duckduckgo" "read_url"
+           ;; Sequential reasoning
+           "sequentialthinking"
+           ;; All filesystem
+           "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
+           "list_directory" "list_allowed_directories" "directory_tree" "search_files"
+           "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
+           ;; All emacs mode
+           "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
+           ;; All emacs repl
+           "evaluate_elisp" "evaluate_elisp_in_buffer"
+           ;; All user interaction
+           "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
+
+)
+
+(gptel-make-preset "executive assistant"
+  :system "You are an executive assistant. You are very helpful, but unsure about your knowledge. When trying to do things, you rely on tools, and look things up online. You are aware that many websites are actually ads, so verify across several searches to make sure things are true. You always thing things through when trying to be of assistance. As an executive assistant, you confirm with the user before deciding a course of action"
+  :model 'cluade-sonnet-4-20250514
+  :temperature 0.6
+  :tools (list
              ;; All web search
              "search_duckduckgo" "read_url"
              ;; Sequential reasoning
@@ -235,54 +300,7 @@ name as well to trigger updates"
              "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
              "list_directory" "list_allowed_directories" "directory_tree" "search_files"
              "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
-             ;; All emacs mode
-             "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
-             ;; All emacs repl
-             "evaluate_elisp" "evaluate_elisp_in_buffer"
-             ;; All user interaction
              "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
-
-
-  (gptel-make-preset "software-developer"
-    :system "You are a developer helping to build applications. You are part of a pair, and should ask the user for preferences, for help deciding between different approaches, and for feedback on designs."
-    :model 'claude-sonnet-4-20250514
-    :temperature 0.1
-    :tools (list
-             ;; All web search
-             "search_duckduckgo" "read_url"
-             ;; Sequential reasoning
-             "sequentialthinking"
-             ;; All filesystem
-             "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
-             "list_directory" "list_allowed_directories" "directory_tree" "search_files"
-             "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
-             ;; All emacs mode
-             "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
-             ;; All emacs repl
-             "evaluate_elisp" "evaluate_elisp_in_buffer"
-             ;; All user interaction
-             "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
-  (gptel-make-preset "product manager"
-    :system "You are a product manager helping to plan software development. Research problem domains and available tools and libraries, and break down problems into a sequence of steps. Favor producing user stories and acceptance criteria rather than code"
-    :model 'claude-sonnet-4-20250514
-    :temperature 0.5
-    :tools (list
-             ;; All web search
-             "search_duckduckgo" "read_url"
-             ;; Sequential reasoning
-             "sequentialthinking"
-             ;; All filesystem
-             "read_file" "write_file" "edit_file" "create_directory" "move_file" "get_file_info"
-             "list_directory" "list_allowed_directories" "directory_tree" "search_files"
-             "read_multiple_files" "zip_files" "unzip_file" "zip_directory"
-             ;; All emacs mode
-             "get_buffer_mode_info" "get_mode_documentation" "execute_mode_command"
-             ;; All emacs repl
-             "evaluate_elisp" "evaluate_elisp_in_buffer"
-             ;; All user interaction
-             "ask_user_question" "ask_user_choice" "notify_user" "confirm_user_action" "get_user_preference"))
-
-  )
 
 ;; Load the gptel tools file
 (after! gptel
@@ -293,47 +311,14 @@ name as well to trigger updates"
 
 (require 'mcp-hub)
 
+
 (defvar mcp-search-root-directories
   (list (expand-file-name "~/")
     (expand-file-name "~/.doom.d/"))
   "List of root directories to search for git/jj repositories.")
 
-;; (defun mcp-discover-projects ()
-;;   "Return a list of directories containing git/jj repositories using fd."
-;;   (let ((project-dirs '())
-;;          (excluded-dirs '(".Trash" ".cache" "Library" ".local" "Applications" "Music" "Movies" "Pictures")))
-
-;;     ;; Search through each specified root directory
-;;     (dolist (root-dir mcp-search-root-directories)
-;;       (when (file-directory-p root-dir)
-;;         ;; Check if the root itself is a git/jj repo
-;;         (if (or (file-exists-p (expand-file-name ".git" root-dir))
-;;               (file-exists-p (expand-file-name ".jj" root-dir)))
-;;           (push root-dir project-dirs))
-
-;;         ;; Search for all non-excluded directories under this root
-;;         (dolist (dir (directory-files root-dir t))
-;;           (when (and (file-directory-p dir)
-;;                   (not (member (file-name-nondirectory dir) excluded-dirs))
-;;                   (not (string-match-p "/\\." (file-name-directory dir))))
-;;             ;; Check if this is a git/jj repo
-;;             (if (or (file-exists-p (expand-file-name ".git" dir))
-;;                   (file-exists-p (expand-file-name ".jj" dir)))
-;;               (push dir project-dirs)
-;;               ;; Use fd to find repositories in this directory
-;;               (when-let* ((default-directory dir)
-;;                            (fd-available (executable-find "fd"))
-;;                            (cmd (concat "fd -H -t d -E .Trash -E node_modules -E .cargo "
-;;                                   "'^\\.(git|jj)$' --max-depth 4 -x dirname {} | xargs realpath"))
-;;                            (repos (ignore-errors
-;;                                     (split-string (shell-command-to-string cmd) "\n" t))))
-;;                 (setq project-dirs (append repos project-dirs))))))))
-
-;;     ;; Make sure all paths are absolute
-;;     (mapcar #'expand-file-name project-dirs)))
-
 (setq mcp-hub-servers
-  `(("filesystem" . (:command "nix" :args ("run" "github:zgagnon/mcp-collection#filesystem" "/Users/zell/git/" "/Users/zell/.doom.d" "--" "-w"))      )
+  `(("filesystem" . (:command "nix" :args ("run" "github:zgagnon/mcp-collection#filesystem" "/Users/zell/logseq/" "/Users/zell/git/" "/Users/zell/.doom.d" "--" "-w"))      )
      ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
      ("web-access" . (:command "nix" :args ("run" "github:zgagnon/mcp-collection#web-mcp") ))
      ("nix" . (:command "nix" :args ("run" "github:utensils/mcp-nixos", "--") ))
@@ -387,16 +372,23 @@ name as well to trigger updates"
 
 (mcp-make-text-tool "filesystem" "write_file")
 
-(use-package aider
-  :config
-  (setq aider-args '("--model" "gpt-4o-mini")))
-
 (setq user-full-name "Zoe Gagnon"
       user-mail-address "zoe@zgagnon.com")
 
 (setq read-process-output-max (* 1024 1024))
 (setq gc-cons-threshold 100000000)
 (setq lsp-idle-delay 0.5)
+
+(defvar my/global-lsp-ignore-dirs
+  '("_build" "deps" ".jj" ".direnv" "node_modules" "result" "target"))
+
+(defun make-lsp-ignore-patterns (patterns)
+  (mapcar (lambda (pattern) (format "**/%s/**" pattern)) patterns))
+
+(after! lsp-mode
+  (setq lsp-file-watch-ignored-directories
+    (append lsp-file-watch-ignored-directories
+      (make-lsp-ignore-patterns my/global-lsp-ignore-dirs))))
 
 (use-package! treesit-auto
   :custom
@@ -435,6 +427,25 @@ name as well to trigger updates"
 
 (add-hook 'elixir-ts-mode-hook #'my/ensure-envrc-loaded)
 (add-hook 'find-file-hook #'my/ensure-envrc-loaded)
+
+;; Universal Elixir-LS Direnv Integration
+;; This configures LSP to use a universal wrapper script that automatically
+;; detects direnv environments and runs elixir-ls in the correct context.
+;; The wrapper script (~/.doom.d/elixir-ls-direnv-wrapper.sh) handles:
+;; - Automatic detection of .envrc files in project directories
+;; - Running elixir-ls via 'direnv exec' when .envrc is present
+;; - Falling back to global elixir-ls for non-direnv projects
+;; This eliminates the need for per-project .dir-locals.el configuration.
+(after! lsp-mode
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     (lambda ()
+                       (list (expand-file-name "~/.doom.d/elixir-ls-direnv-wrapper.sh"))))
+    :major-modes '(elixir-mode elixir-ts-mode)
+    :priority 1
+    :server-id 'elixir-ls-direnv
+    :initialization-options (lambda () (list :dialyzerEnabled :json-false)))))
 
 (setq treesit-language-source-alist
       (append treesit-language-source-alist
