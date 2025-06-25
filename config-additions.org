@@ -1,0 +1,161 @@
+* Language Support Additions
+
+Here are the missing configuration sections for your language support:
+
+** Just Configuration
+
+Just is a command runner similar to make but simpler. Here's the configuration:
+
+#+begin_src elisp :tangle config.el
+;; Just mode configuration
+(after! just-mode
+  ;; Enable syntax highlighting and indentation
+  (add-to-list 'auto-mode-alist '("\\(?:^\\|/\\)[Jj]ustfile\\'" . just-mode))
+  (add-to-list 'auto-mode-alist '("\\.just\\'" . just-mode))
+  
+  ;; Key bindings for just-mode
+  (map! :map just-mode-map
+        :leader
+        (:prefix ("m" . "just")
+         :desc "Execute recipe at point" "e" #'just-mode-exec-recipe-at-point
+         :desc "List all recipes" "l" #'just-mode-list-recipes
+         :desc "Execute recipe" "r" #'just-mode-exec-recipe)))
+
+;; Optional: Add just-mode to treesitter if available
+(after! treesit-auto
+  (when (treesit-language-available-p 'just)
+    (add-to-list 'treesit-auto-langs 'just)))
+#+end_src
+
+** CSV Configuration
+
+Enhanced CSV editing with alignment and navigation:
+
+#+begin_src elisp :tangle config.el
+;; CSV mode configuration
+(after! csv-mode
+  ;; Automatically align CSV fields for better readability
+  (setq csv-align-style 'auto)
+  (setq csv-align-padding 1)
+  
+  ;; Key bindings for CSV operations
+  (map! :map csv-mode-map
+        :leader
+        (:prefix ("m" . "csv")
+         :desc "Align fields" "a" #'csv-align-fields
+         :desc "Unalign fields" "u" #'csv-unalign-fields
+         :desc "Sort fields" "s" #'csv-sort-fields
+         :desc "Sort numeric" "n" #'csv-sort-numeric-fields
+         :desc "Reverse region" "r" #'csv-reverse-region
+         :desc "Toggle separator" "t" #'csv-toggle-separator
+         :desc "Insert column" "i" #'csv-insert-column
+         :desc "Kill column" "k" #'csv-kill-column
+         :desc "Transpose" "T" #'csv-transpose))
+  
+  ;; Auto-align when opening CSV files
+  (add-hook 'csv-mode-hook
+            (lambda ()
+              (when (< (buffer-size) 100000) ; Only for reasonably sized files
+                (csv-align-fields nil (point-min) (point-max)))))
+  
+  ;; Highlight current field
+  (add-hook 'csv-mode-hook #'csv-highlight-mode))
+
+;; Optional: Add CSV support to treesitter
+(after! treesit-auto
+  (when (treesit-language-available-p 'csv)
+    (add-to-list 'treesit-auto-langs 'csv)))
+#+end_src
+
+** Tailwind CSS Configuration
+
+Enhanced Tailwind CSS support with LSP and utilities:
+
+#+begin_src elisp :tangle config.el
+;; Tailwind CSS LSP configuration
+(after! lsp-tailwindcss
+  ;; Configure file associations for Tailwind
+  (setq lsp-tailwindcss-add-on-mode t)
+  (setq lsp-tailwindcss-experimental-class-regex
+        '("class[:]\\s*['\"]([^'\"]*)['\"]"
+          "className[:]\\s*['\"]([^'\"]*)['\"]"
+          "class[:]\\s*[`]([^`]*)[`]"
+          "className[:]\\s*[`]([^`]*)[`]"))
+  
+  ;; Enable Tailwind LSP for relevant modes
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (when (or (string-match-p "\\.html\\'" (buffer-file-name))
+                        (string-match-p "\\.jsx?\\'" (buffer-file-name))
+                        (string-match-p "\\.tsx?\\'" (buffer-file-name))
+                        (string-match-p "\\.vue\\'" (buffer-file-name)))
+                (lsp-tailwindcss-mode 1))))
+  
+  (add-hook 'css-mode-hook #'lsp-tailwindcss-mode)
+  (add-hook 'scss-mode-hook #'lsp-tailwindcss-mode)
+  (add-hook 'js-mode-hook #'lsp-tailwindcss-mode)
+  (add-hook 'typescript-mode-hook #'lsp-tailwindcss-mode)
+  (add-hook 'tsx-ts-mode-hook #'lsp-tailwindcss-mode)
+  (add-hook 'jsx-ts-mode-hook #'lsp-tailwindcss-mode))
+
+;; Optional: Tailwind-specific snippets and utilities
+(after! web-mode
+  ;; Add Tailwind-specific key bindings
+  (map! :map web-mode-map
+        :leader
+        (:prefix ("m t" . "tailwind")
+         :desc "Sort classes" "s" #'lsp-tailwindcss-sort-classes
+         :desc "Show class info" "i" #'lsp-describe-thing-at-point)))
+
+;; Configure completion for Tailwind classes
+(after! company
+  (add-hook 'css-mode-hook
+            (lambda ()
+              (setq-local company-backends
+                          (append '(company-css company-capf) company-backends))))
+  
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (when (string-match-p "\\.[jt]sx?\\'" (buffer-file-name))
+                (setq-local company-backends
+                            (append '(company-capf) company-backends))))))
+#+end_src
+
+** Additional Language Enhancements
+
+Some general improvements for your language setup:
+
+#+begin_src elisp :tangle config.el
+;; General language mode improvements
+(after! prog-mode
+  ;; Show function signatures in echo area
+  (add-hook 'prog-mode-hook #'eldoc-mode)
+  
+  ;; Highlight matching parentheses
+  (add-hook 'prog-mode-hook #'show-paren-mode)
+  
+  ;; Enable rainbow delimiters for better bracket matching
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+
+;; Improve web development experience
+(after! web-mode
+  ;; Better indentation for web files
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-attr-indent-offset 2)
+  
+  ;; Enable auto-pairing for web mode
+  (setq web-mode-enable-auto-pairing t)
+  (setq web-mode-enable-auto-closing t)
+  (setq web-mode-enable-current-element-highlight t)
+  (setq web-mode-enable-current-column-highlight t))
+
+;; JSON improvements
+(after! json-mode
+  ;; Better JSON formatting
+  (setq js-indent-level 2)
+  (add-hook 'json-mode-hook
+            (lambda ()
+              (setq-local tab-width 2))))
+#+end_src

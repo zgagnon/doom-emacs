@@ -20,5 +20,8 @@
 ;; Documentation tools
 (require 'adr-tools)
 
+;; Interactive tools
+(require 'interactive-tools)
+
 (provide 'gptel-tools-index)
 ;;; gptel-tools-index.el ends here

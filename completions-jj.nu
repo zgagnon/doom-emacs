@@ -30,7 +30,7 @@ module completions {
   export extern "jj abandon" [
     ...revisions_pos: string  # The revision(s) to abandon (default: @)
     -r: string
-    --summary(-s)             # Do not print every abandoned commit on a separate line
+    --summary(-s)
     --retain-bookmarks        # Do not delete bookmarks pointing to the revisions to abandon
     --restore-descendants     # Do not modify the content of the children of the abandoned commits
     --repository(-R): path    # Path to repository to operate on
@@ -77,7 +77,7 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Apply the reverse of a revision on top of another revision
+  # Apply the reverse of given revisions on top of another revision
   export extern "jj backout" [
     --revisions(-r): string   # The revision(s) to apply the reverse of
     --destination(-d): string # The revision to apply the reverse changes on top of
@@ -167,8 +167,9 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Forget everything about a bookmark, including its local and remote targets
+  # Forget a bookmark without marking it as a deletion to be pushed
   export extern "jj bookmark forget" [
+    --include-remotes         # When forgetting a local bookmark, also forget any corresponding remote bookmarks
     ...names: string          # The bookmarks to forget
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
@@ -185,6 +186,10 @@ module completions {
     --help(-h)                # Print help (see more with '--help')
   ]
 
+  def "nu-complete jj bookmark list sort" [] {
+    [ "name" "name-" "author-name" "author-name-" "author-email" "author-email-" "author-date" "author-date-" "committer-name" "committer-name-" "committer-email" "committer-email-" "committer-date" "committer-date-" ]
+  }
+
   def "nu-complete jj bookmark list color" [] {
     [ "always" "never" "debug" "auto" ]
   }
@@ -198,6 +203,7 @@ module completions {
     ...names: string          # Show bookmarks whose local name matches
     --revisions(-r): string   # Show bookmarks whose local targets are in the given revisions
     --template(-T): string    # Render each bookmark using the given template
+    --sort: string@"nu-complete jj bookmark list sort" # Sort bookmarks based on the given key (or multiple keys)
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -219,10 +225,10 @@ module completions {
 
   # Move existing bookmarks to target revision
   export extern "jj bookmark move" [
-    --from: string            # Move bookmarks from the given revisions
-    --to: string              # Move bookmarks to this revision
-    --allow-backwards(-B)     # Allow moving bookmarks backwards or sideways
     ...names: string          # Move bookmarks matching the given name patterns
+    --from(-f): string        # Move bookmarks from the given revisions
+    --to(-t): string          # Move bookmarks to this revision
+    --allow-backwards(-B)     # Allow moving bookmarks backwards or sideways
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -330,240 +336,6 @@ module completions {
     --help(-h)                # Print help (see more with '--help')
   ]
 
-  def "nu-complete jj branch color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Manage bookmarks [default alias: b]
-  export extern "jj branch" [
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch create color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Create a new bookmark
-  export extern "jj branch create" [
-    --revision(-r): string    # The bookmark's target revision
-    --to: string              # The bookmark's target revision
-    ...names: string          # The bookmarks to create
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch create color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch delete color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Delete an existing bookmark and propagate the deletion to remotes on the next push
-  export extern "jj branch delete" [
-    ...names: string          # The bookmarks to delete
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch delete color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch forget color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Forget everything about a bookmark, including its local and remote targets
-  export extern "jj branch forget" [
-    ...names: string          # The bookmarks to forget
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch forget color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch list color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # List bookmarks and their targets
-  export extern "jj branch list" [
-    --all-remotes(-a)         # Show all tracking and non-tracking remote bookmarks including the ones whose targets are synchronized with the local bookmarks
-    --remote: string          # Show all tracking and non-tracking remote bookmarks belonging to this remote
-    --tracked(-t)             # Show remote tracked bookmarks only. Omits local Git-tracking bookmarks by default
-    --conflicted(-c)          # Show conflicted bookmarks only
-    ...names: string          # Show bookmarks whose local name matches
-    --revisions(-r): string   # Show bookmarks whose local targets are in the given revisions
-    --template(-T): string    # Render each bookmark using the given template
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch list color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch move color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Move existing bookmarks to target revision
-  export extern "jj branch move" [
-    --from: string            # Move bookmarks from the given revisions
-    --to: string              # Move bookmarks to this revision
-    --allow-backwards(-B)     # Allow moving bookmarks backwards or sideways
-    ...names: string          # Move bookmarks matching the given name patterns
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch move color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch rename color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Rename `old` bookmark name to `new` bookmark name
-  export extern "jj branch rename" [
-    old: string               # The old name of the bookmark
-    new: string               # The new name of the bookmark
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch rename color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch set color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Create or update a bookmark to point to a certain commit
-  export extern "jj branch set" [
-    --revision(-r): string    # The bookmark's target revision
-    --to: string              # The bookmark's target revision
-    --allow-backwards(-B)     # Allow moving the bookmark backwards or sideways
-    ...names: string          # The bookmarks to update
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch set color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch track color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Start tracking given remote bookmarks
-  export extern "jj branch track" [
-    ...names: string          # Remote bookmarks to track
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch track color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj branch untrack color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Stop tracking given remote bookmarks
-  export extern "jj branch untrack" [
-    ...names: string          # Remote bookmarks to untrack
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj branch untrack color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
   def "nu-complete jj commit color" [] {
     [ "always" "never" "debug" "auto" ]
   }
@@ -661,7 +433,7 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # List variables set in config file, along with their values
+  # List variables set in config files, along with their values
   export extern "jj config list" [
     name?: string             # An optional name of a specific config option to look up
     --include-defaults        # Whether to explicitly include built-in default values in the list
@@ -688,7 +460,7 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Print the path to the config file
+  # Print the paths to the config files
   export extern "jj config path" [
     --user                    # Target the user-level config
     --repo                    # Target the repo-level config
@@ -711,7 +483,7 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Update config file to set the given option to a given value
+  # Update a config file to set the given option to a given value
   export extern "jj config set" [
     name: string
     value: string             # New value to set
@@ -736,7 +508,7 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Update config file to unset the given option
+  # Update a config file to unset the given option
   export extern "jj config unset" [
     name: string
     --user                    # Target the user-level config
@@ -781,9 +553,9 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Rebuild commit index
+  # Show information about file copies detected
   export extern "jj debug copy-detection" [
-    revision?: string         # Show changes in this revision, compared to its parent(s)
+    revision?: string         # Show file copies detected in changed files in this revision, compared to its parent(s)
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -834,6 +606,28 @@ module completions {
     --at-op: string           # Operation to load the repo at
     --debug                   # Enable debug logging
     --color: string@"nu-complete jj debug index color" # When to colorize output
+    --quiet                   # Silence non-primary command output
+    --no-pager                # Disable the pager
+    --config: string          # Additional configuration options (can be repeated)
+    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
+    --config-file: path       # Additional configuration files (can be repeated)
+    --help(-h)                # Print help (see more with '--help')
+  ]
+
+  def "nu-complete jj debug init-simple color" [] {
+    [ "always" "never" "debug" "auto" ]
+  }
+
+  # Create a new repo in the given directory using the proof-of-concept simple backend
+  export extern "jj debug init-simple" [
+    destination?: path        # The destination directory
+    --repository(-R): path    # Path to repository to operate on
+    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
+    --ignore-immutable        # Allow rewriting immutable commits
+    --at-operation: string    # Operation to load the repo at
+    --at-op: string           # Operation to load the repo at
+    --debug                   # Enable debug logging
+    --color: string@"nu-complete jj debug init-simple color" # When to colorize output
     --quiet                   # Silence non-primary command output
     --no-pager                # Disable the pager
     --config: string          # Additional configuration options (can be repeated)
@@ -1158,7 +952,7 @@ module completions {
 
   # Compare file contents between two revisions
   export extern "jj diff" [
-    --revision(-r): string    # Show changes in this revision, compared to its parent(s)
+    --revisions(-r): string   # Show changes in these revisions
     --from(-f): string        # Show changes from this revision
     --to(-t): string          # Show changes to this revision
     ...paths: path            # Restrict the diff to these paths
@@ -1330,6 +1124,7 @@ module completions {
   export extern "jj file annotate" [
     path: path                # the file to annotate
     --revision(-r): string    # an optional revision to start at
+    --template(-T): string    # Render each line using the given template
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -1515,7 +1310,7 @@ module completions {
 
   # Create a new repo backed by a clone of a Git repo
   export extern "jj git clone" [
-    source: path              # URL or path of the Git repo to clone
+    source: string            # URL or path of the Git repo to clone
     destination?: path        # Specifies the target directory for the Jujutsu repository clone. If not provided, defaults to a directory named after the last component of the source URL. The full directory path will be created if it doesn't exist
     --remote: string          # Name of the newly created remote
     --colocate                # Whether or not to colocate the Jujutsu repo with the git repo
@@ -1633,14 +1428,15 @@ module completions {
   export extern "jj git push" [
     --remote: string          # The remote to push to (only named remotes are supported)
     --bookmark(-b): string    # Push only this bookmark, or bookmarks matching a pattern (can be repeated)
-    --all                     # Push all bookmarks (including new and deleted bookmarks)
-    --tracked                 # Push all tracked bookmarks (including deleted bookmarks)
+    --all                     # Push all bookmarks (including new bookmarks)
+    --tracked                 # Push all tracked bookmarks
     --deleted                 # Push all deleted bookmarks
     --allow-new(-N)           # Allow pushing new bookmarks
     --allow-empty-description # Allow pushing commits with empty descriptions
     --allow-private           # Allow pushing commits that are private
     --revisions(-r): string   # Push bookmarks pointing to these commits (can be repeated)
     --change(-c): string      # Push this commit by creating a bookmark based on its change ID (can be repeated)
+    --named: string           # Specify a new bookmark name and a revision to push under that name, e.g. '--named myfeature=@'
     --dry-run                 # Only display what will change on the remote
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
@@ -1685,7 +1481,7 @@ module completions {
   # Add a Git remote
   export extern "jj git remote add" [
     remote: string            # The remote's name
-    url: path                 # The remote's URL or path
+    url: string               # The remote's URL or path
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -1774,7 +1570,7 @@ module completions {
   # Set the URL of a Git remote
   export extern "jj git remote set-url" [
     remote: string            # The remote's name
-    url: path                 # The desired URL or path for `remote`
+    url: string               # The desired URL or path for `remote`
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -1790,41 +1586,19 @@ module completions {
     --help(-h)                # Print help (see more with '--help')
   ]
 
-  def "nu-complete jj git submodule color" [] {
+  def "nu-complete jj git root color" [] {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # FOR INTERNAL USE ONLY Interact with git submodules
-  export extern "jj git submodule" [
+  # Show the underlying Git directory of a repository using the Git backend
+  export extern "jj git root" [
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
     --at-operation: string    # Operation to load the repo at
     --at-op: string           # Operation to load the repo at
     --debug                   # Enable debug logging
-    --color: string@"nu-complete jj git submodule color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj git submodule print-gitmodules color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Print the relevant contents from .gitmodules. For debugging purposes only
-  export extern "jj git submodule print-gitmodules" [
-    --revisions(-r): string   # Read .gitmodules from the given revision
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj git submodule print-gitmodules color" # When to colorize output
+    --color: string@"nu-complete jj git root color" # When to colorize output
     --quiet                   # Silence non-primary command output
     --no-pager                # Disable the pager
     --config: string          # Additional configuration options (can be repeated)
@@ -1852,28 +1626,6 @@ module completions {
     --at-op: string           # Operation to load the repo at
     --debug                   # Enable debug logging
     --color: string@"nu-complete jj help color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj init color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Create a new repo in the given directory
-  export extern "jj init" [
-    destination?: path        # The destination directory
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj init color" # When to colorize output
     --quiet                   # Silence non-primary command output
     --no-pager                # Disable the pager
     --config: string          # Additional configuration options (can be repeated)
@@ -2099,7 +1851,7 @@ module completions {
     --reversed                # Show operations in the opposite order (older operations first)
     --no-graph                # Don't show the graph, show a flat list of operations
     --template(-T): string    # Render each operation using the given template
-    --op-diff                 # Show changes to the repository at each operation
+    --op-diff(-d)             # Show changes to the repository at each operation
     --patch(-p)               # Show patch of modifications to changes (implies --op-diff)
     --summary(-s)             # For each path, show only whether it was modified, added, or deleted
     --stat                    # Show a histogram of the changes
@@ -2275,8 +2027,8 @@ module completions {
     --after: string           # The revision(s) to insert after (can be repeated to create a merge commit)
     --insert-before(-B): string # The revision(s) to insert before (can be repeated to create a merge commit)
     --before: string          # The revision(s) to insert before (can be repeated to create a merge commit)
-    --skip-empty              # Deprecated. Use --skip-emptied instead
     --skip-emptied            # If true, when rebasing would produce an empty commit, the commit is abandoned. It will not be abandoned if it was already empty before the rebase. Will never skip merge commits with multiple non-empty parents
+    --keep-divergent          # Keep divergent commits while rebasing
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -2351,9 +2103,14 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # A dummy command that accepts any arguments
+  # Apply the reverse of the given revision(s)
   export extern "jj revert" [
-    ..._args: string
+    --revisions(-r): string   # The revision(s) to apply the reverse of
+    --destination(-d): string # The revision(s) to apply the reverse changes on top of
+    --insert-after(-A): string # The revision(s) to insert the reverse changes after (can be repeated to create a merge commit)
+    --after: string           # The revision(s) to insert the reverse changes after (can be repeated to create a merge commit)
+    --insert-before(-B): string # The revision(s) to insert the reverse changes before (can be repeated to create a merge commit)
+    --before: string          # The revision(s) to insert the reverse changes before (can be repeated to create a merge commit)
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -2373,7 +2130,7 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Show the current workspace root directory
+  # Show the current workspace root directory (shortcut for `jj workspace root`)
   export extern "jj root" [
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
@@ -2432,8 +2189,9 @@ module completions {
     --color-words             # Show a word-level diff with changes indicated only by color
     --tool: string            # Generate diff by external command
     --context: string         # Number of lines of context to show
-    --ignore-all-space        # Ignore whitespace when comparing lines
-    --ignore-space-change     # Ignore changes in amount of whitespace when comparing lines
+    --no-patch                # Do not show the patch
+    --ignore-all-space(-w)    # Ignore whitespace when comparing lines
+    --ignore-space-change(-b) # Ignore changes in amount of whitespace when comparing lines
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -2441,6 +2199,29 @@ module completions {
     --at-op: string           # Operation to load the repo at
     --debug                   # Enable debug logging
     --color: string@"nu-complete jj show color" # When to colorize output
+    --quiet                   # Silence non-primary command output
+    --no-pager                # Disable the pager
+    --config: string          # Additional configuration options (can be repeated)
+    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
+    --config-file: path       # Additional configuration files (can be repeated)
+    --help(-h)                # Print help (see more with '--help')
+  ]
+
+  def "nu-complete jj sign color" [] {
+    [ "always" "never" "debug" "auto" ]
+  }
+
+  # Cryptographically sign a revision
+  export extern "jj sign" [
+    --revisions(-r): string   # What revision(s) to sign
+    --key: string             # The key used for signing
+    --repository(-R): path    # Path to repository to operate on
+    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
+    --ignore-immutable        # Allow rewriting immutable commits
+    --at-operation: string    # Operation to load the repo at
+    --at-op: string           # Operation to load the repo at
+    --debug                   # Enable debug logging
+    --color: string@"nu-complete jj sign color" # When to colorize output
     --quiet                   # Silence non-primary command output
     --no-pager                # Disable the pager
     --config: string          # Additional configuration options (can be repeated)
@@ -2589,8 +2370,14 @@ module completions {
     --interactive(-i)         # Interactively choose which parts to split
     --tool: string            # Specify diff editor to be used (implies --interactive)
     --revision(-r): string    # The revision to split
+    --destination(-d): string # The revision(s) to rebase onto (can be repeated to create a merge commit)
+    --insert-after(-A): string # The revision(s) to insert after (can be repeated to create a merge commit)
+    --after: string           # The revision(s) to insert after (can be repeated to create a merge commit)
+    --insert-before(-B): string # The revision(s) to insert before (can be repeated to create a merge commit)
+    --before: string          # The revision(s) to insert before (can be repeated to create a merge commit)
+    --message(-m): string     # The change description to use (don't open editor)
     --parallel(-p)            # Split the revision into two parallel revisions instead of a parent and child
-    ...paths: path            # Files matching any of these filesets are put in the first commit
+    ...paths: path            # Files matching any of these filesets are put in the selected changes
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -2703,6 +2490,55 @@ module completions {
     --help(-h)                # Print help (see more with '--help')
   ]
 
+  def "nu-complete jj undo what" [] {
+    [ "repo" "remote-tracking" ]
+  }
+
+  def "nu-complete jj undo color" [] {
+    [ "always" "never" "debug" "auto" ]
+  }
+
+  # Undo an operation (shortcut for `jj op undo`)
+  export extern "jj undo" [
+    operation?: string        # The operation to undo
+    --what: string@"nu-complete jj undo what" # What portions of the local state to restore (can be repeated)
+    --repository(-R): path    # Path to repository to operate on
+    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
+    --ignore-immutable        # Allow rewriting immutable commits
+    --at-operation: string    # Operation to load the repo at
+    --at-op: string           # Operation to load the repo at
+    --debug                   # Enable debug logging
+    --color: string@"nu-complete jj undo color" # When to colorize output
+    --quiet                   # Silence non-primary command output
+    --no-pager                # Disable the pager
+    --config: string          # Additional configuration options (can be repeated)
+    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
+    --config-file: path       # Additional configuration files (can be repeated)
+    --help(-h)                # Print help (see more with '--help')
+  ]
+
+  def "nu-complete jj unsign color" [] {
+    [ "always" "never" "debug" "auto" ]
+  }
+
+  # Drop a cryptographic signature
+  export extern "jj unsign" [
+    --revisions(-r): string   # What revision(s) to unsign
+    --repository(-R): path    # Path to repository to operate on
+    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
+    --ignore-immutable        # Allow rewriting immutable commits
+    --at-operation: string    # Operation to load the repo at
+    --at-op: string           # Operation to load the repo at
+    --debug                   # Enable debug logging
+    --color: string@"nu-complete jj unsign color" # When to colorize output
+    --quiet                   # Silence non-primary command output
+    --no-pager                # Disable the pager
+    --config: string          # Additional configuration options (can be repeated)
+    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
+    --config-file: path       # Additional configuration files (can be repeated)
+    --help(-h)                # Print help (see more with '--help')
+  ]
+
   def "nu-complete jj util color" [] {
     [ "always" "never" "debug" "auto" ]
   }
@@ -2734,10 +2570,7 @@ module completions {
 
   # Print a command-line-completion script
   export extern "jj util completion" [
-    shell?: string@"nu-complete jj util completion shell"
-    --bash                    # Deprecated. Use the SHELL positional argument instead
-    --fish                    # Deprecated. Use the SHELL positional argument instead
-    --zsh                     # Deprecated. Use the SHELL positional argument instead
+    shell: string@"nu-complete jj util completion shell"
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -2854,79 +2687,6 @@ module completions {
     --at-op: string           # Operation to load the repo at
     --debug                   # Enable debug logging
     --color: string@"nu-complete jj util markdown-help color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj undo what" [] {
-    [ "repo" "remote-tracking" ]
-  }
-
-  def "nu-complete jj undo color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Undo an operation (shortcut for `jj op undo`)
-  export extern "jj undo" [
-    operation?: string        # The operation to undo
-    --what: string@"nu-complete jj undo what" # What portions of the local state to restore (can be repeated)
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj undo color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj unsquash color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Move changes from a revision's parent into the revision
-  export extern "jj unsquash" [
-    --revision(-r): string
-    --interactive(-i)         # Interactively choose which parts to unsquash
-    --tool: string            # Specify diff editor to be used (implies --interactive)
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj unsquash color" # When to colorize output
-    --quiet                   # Silence non-primary command output
-    --no-pager                # Disable the pager
-    --config: string          # Additional configuration options (can be repeated)
-    --config-toml: string     # Additional configuration options (can be repeated) (DEPRECATED)
-    --config-file: path       # Additional configuration files (can be repeated)
-    --help(-h)                # Print help (see more with '--help')
-  ]
-
-  def "nu-complete jj untrack color" [] {
-    [ "always" "never" "debug" "auto" ]
-  }
-
-  # Stop tracking specified paths in the working copy
-  export extern "jj untrack" [
-    ...paths: path            # Paths to untrack. They must already be ignored
-    --repository(-R): path    # Path to repository to operate on
-    --ignore-working-copy     # Don't snapshot the working copy, and don't update it
-    --ignore-immutable        # Allow rewriting immutable commits
-    --at-operation: string    # Operation to load the repo at
-    --at-op: string           # Operation to load the repo at
-    --debug                   # Enable debug logging
-    --color: string@"nu-complete jj untrack color" # When to colorize output
     --quiet                   # Silence non-primary command output
     --no-pager                # Disable the pager
     --config: string          # Additional configuration options (can be repeated)
