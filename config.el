@@ -314,63 +314,69 @@ name as well to trigger updates"
 
 (defvar mcp-search-root-directories
   (list (expand-file-name "~/")
-    (expand-file-name "~/.doom.d/"))
+        (expand-file-name "~/.doom.d/"))
   "List of root directories to search for git/jj repositories.")
+(defvar mcp-filesystem-base-directories
+  '(("zell" . ("/Users/zell/logseq/" "/Users/zell/git/" "/Users/zell/.doom.d"))
+    ("coder" . ("/home/coder/.doom.d" "/home/coder/jj"))))
 
-(setq mcp-hub-servers
-  `(("filesystem" . (:command "nix" :args ("run" "github:zgagnon/mcp-collection#filesystem" "/Users/zell/logseq/" "/Users/zell/git/" "/Users/zell/.doom.d" "--" "-w"))      )
-     ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
-     ("web-access" . (:command "nix" :args ("run" "github:zgagnon/mcp-collection#web-mcp") ))
-     ("nix" . (:command "nix" :args ("run" "github:utensils/mcp-nixos", "--") ))
-     ("text-editor" . (:command "uvx" :args ("mcp-text-editor")))
-     ("user-interaction" . (:command "npx" :args ("-y" "interactive-mcp")))
-     ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
+  (setq mcp-hub-servers
+        `(("filesystem" . (:command "nix" :args ,(append '("run" "github:zgagnon/mcp-collection#filesystem")
+                                                         (alist-get (user-login-name) mcp-filesystem-base-directories
+                                                                    '("~/.doom.d") nil #'string=)
+                                                         '("--" "-w"))))
+          ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+          ("web-access" . (:command "nix" :args ("run" "github:zgagnon/mcp-collection#web-mcp") ))
+          ("nix" . (:command "nix" :args ("run" "github:utensils/mcp-nixos", "--") ))
+          ("text-editor" . (:command "uvx" :args ("mcp-text-editor")))
+          ("user-interaction" . (:command "npx" :args ("-y" "interactive-mcp")))
+          ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
 
-(add-hook 'after-init-hook
-  #'mcp-hub-start-all-server)
+  (add-hook 'after-init-hook
+            #'mcp-hub-start-all-server)
 
-(defun gptel-mcp-register-tool ()
-  (interactive)
-  (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
-    (mapcar #'(lambda (tool)
-                (apply #'gptel-make-tool
-                  tool))
-      tools)))
+  (defun gptel-mcp-register-tool ()
+    (interactive)
+    (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+      (mapcar #'(lambda (tool)
+                  (apply #'gptel-make-tool
+                         tool))
+              tools)))
 
-(defun gptel-mcp-use-tool ()
-  (interactive)
-  (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
-    (mapcar #'(lambda (tool)
-                (let ((path (list (plist-get tool :category)
-                              (plist-get tool :name))))
-                  (push (gptel-get-tool path)
-                    gptel-tools)))
-      tools)))
+  (defun gptel-mcp-use-tool ()
+    (interactive)
+    (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+      (mapcar #'(lambda (tool)
+                  (let ((path (list (plist-get tool :category)
+                                    (plist-get tool :name))))
+                    (push (gptel-get-tool path)
+                          gptel-tools)))
+              tools)))
 
-(defun gptel-mcp-close-use-tool ()
-  (interactive)
-  (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
-    (mapcar #'(lambda (tool)
-                (let ((path (list (plist-get tool :category)
-                              (plist-get tool :name))))
-                  (setq gptel-tools
-                    (cl-remove-if #'(lambda (tool)
-                                      (equal path
-                                        (list (gptel-tool-category tool)
-                                          (gptel-tool-name tool))))
-                      gptel-tools))))
-      tools)))
+  (defun gptel-mcp-close-use-tool ()
+    (interactive)
+    (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+      (mapcar #'(lambda (tool)
+                  (let ((path (list (plist-get tool :category)
+                                    (plist-get tool :name))))
+                    (setq gptel-tools
+                          (cl-remove-if #'(lambda (tool)
+                                            (equal path
+                                                   (list (gptel-tool-category tool)
+                                                         (gptel-tool-name tool))))
+                                        gptel-tools))))
+              tools)))
 
-;; Add MCP hub keybindings under leader r p
-(map! :leader
-  (:prefix ("r" . "robot chat")
-    (:prefix ("p" . "MCP Hub")
-      :desc "Open MCP Hub" "h" #'mcp-hub
-      :desc "Register MCP tools with GPTel" "g" #'gptel-mcp-register-tool
-      :desc "Show logs for MCP server" "l" #'mcp-hub-view-log
-      :desc "Restart MCP server" "r" #'mcp-hub-restart-server)))
+  ;; Add MCP hub keybindings under leader r p
+  (map! :leader
+        (:prefix ("r" . "robot chat")
+                 (:prefix ("p" . "MCP Hub")
+                  :desc "Open MCP Hub" "h" #'mcp-hub
+                  :desc "Register MCP tools with GPTel" "g" #'gptel-mcp-register-tool
+                  :desc "Show logs for MCP server" "l" #'mcp-hub-view-log
+                  :desc "Restart MCP server" "r" #'mcp-hub-restart-server)))
 
-(mcp-make-text-tool "filesystem" "write_file")
+  (mcp-make-text-tool "filesystem" "write_file")
 
 (setq user-full-name "Zoe Gagnon"
       user-mail-address "zoe@zgagnon.com")
