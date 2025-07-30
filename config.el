@@ -84,10 +84,20 @@
     (inheritenv-add-advice 'exunit-verify-single)
     (inheritenv-add-advice 'exunit-verify-all))
 
+  ;; Add Apheleia commands to inherit environment
+  (inheritenv-add-advice 'apheleia-format-buffer)
+  (inheritenv-add-advice 'apheleia--run-formatter-process)
+  (inheritenv-add-advice 'apheleia--format-region)
+  
+  ;; Also add general shell commands that Apheleia might use
+  (inheritenv-add-advice 'start-process)
+  (inheritenv-add-advice 'call-process)
+
   ;; Add advice for LSP if you're using elixir-ls
-  (when (featurep 'lsp-mode)
-    (inheritenv-add-advice 'lsp)
-    (inheritenv-add-advice 'lsp-restart-workspace)))
+  ;; (when (featurep 'lsp-mode)
+  ;;   (inheritenv-add-advice 'lsp)
+  ;;   (inheritenv-add-advice 'lsp-restart-workspace))
+  )
 
 ;; Ensure exunit gets the advice even if loaded later
 (with-eval-after-load 'exunit
@@ -422,17 +432,30 @@ name as well to trigger updates"
          :desc "Toggle between file and test" "t" #'exunit-toggle-file-and-test
          )))
 
-(defun my/ensure-envrc-loaded ()
-  "Ensure envrc is properly loaded for the current buffer."
+;; Enable envrc globally to handle direnv automatically
+(after! envrc
+  (envrc-global-mode +1))
+
+;; Track which projects have already been loaded to avoid repeated loads
+(defvar my/envrc-loaded-projects nil
+  "List of project directories where envrc has already been loaded.")
+
+(defun my/ensure-envrc-loaded-once ()
+  "Ensure envrc is loaded once per project for Elixir files."
   (when (and (buffer-file-name)
              (string-match-p "\\.exs?$" (buffer-file-name)))
-    (let ((default-directory (locate-dominating-file (buffer-file-name) ".envrc")))
-      (when default-directory
-        (envrc-allow)
-        (envrc-reload)))))
+    (let* ((project-root (locate-dominating-file (buffer-file-name) ".envrc"))
+           (project-root (when project-root (expand-file-name project-root))))
+      (when (and project-root
+                 (not (member project-root my/envrc-loaded-projects)))
+        (let ((default-directory project-root))
+          (envrc-allow)
+          (envrc-reload)
+          (push project-root my/envrc-loaded-projects)
+          (message "Loaded direnv for project: %s" project-root))))))
 
-(add-hook 'elixir-ts-mode-hook #'my/ensure-envrc-loaded)
-(add-hook 'find-file-hook #'my/ensure-envrc-loaded)
+;; Only hook to elixir-ts-mode, not find-file-hook
+(add-hook 'elixir-ts-mode-hook #'my/ensure-envrc-loaded-once)
 
 ;; Universal Elixir-LS Direnv Integration
 ;; This configures LSP to use a universal wrapper script that automatically
