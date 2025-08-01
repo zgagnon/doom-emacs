@@ -250,6 +250,15 @@ disable file search caching - it should always reflect the current state
 (package! inheritenv)
 #+end_src
 
+*** Apheleia (Code Formatting)
+
+#+begin_src elisp :tangle config.el
+;; Use yq for YAML formatting instead of prettier
+(after! apheleia
+  (setf (alist-get 'yaml-mode apheleia-mode-alist) 'yq-yaml)
+  (setf (alist-get 'yaml-ts-mode apheleia-mode-alist) 'yq-yaml))
+#+end_src
+
 #+begin_src elisp :tangle config.el
 (use-package! inheritenv
   :config
