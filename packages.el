@@ -8,6 +8,9 @@
 
 (package! gptel :recipe (:local-repo "~/.doom.d/gptel"))
 
+(package! claude-code-ide
+  :recipe (:type git :host github :repo "manzaltu/claude-code-ide.el"))
+
 (package! treesit-auto)
 (package! evil-textobj-tree-sitter)
 
