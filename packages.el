@@ -3,6 +3,7 @@
 ;;; $DOOMDIR/packages.el
 
 (package! catppuccin-theme)
+(package! ef-themes)
 
 (package! inheritenv)
 

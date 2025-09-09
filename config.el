@@ -11,6 +11,10 @@
       doom-symbol-font (font-spec :family "FiraCode Nerd Font" :size 18)
       doom-serif-font (font-spec :family "FiraCode Nerd Font" :size 18))
 
+;; Set background transparency to 85%
+(set-frame-parameter nil 'alpha-background 85)
+(add-to-list 'default-frame-alist '(alpha-background . 85))
+
 (setq org-directory "~/org/")
 
 
@@ -40,6 +44,9 @@
       :desc "Format org code block" "c b" #'my/org-format-code-block)
 
 (setq projectile-enable-caching nil)
+
+;; Add themes directory to load path
+(add-to-list 'custom-theme-load-path (expand-file-name "themes" doom-user-dir))
 
 (setq catppuccin-flavor 'latte)
 

@@ -144,6 +144,10 @@ Packages which control input methods and direction
      doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font" :size 18)
       doom-symbol-font (font-spec :family "FiraCode Nerd Font" :size 18)
       doom-serif-font (font-spec :family "FiraCode Nerd Font" :size 18))
+
+;; Set background transparency to 85%
+(set-frame-parameter nil 'alpha-background 85)
+(add-to-list 'default-frame-alist '(alpha-background . 85))
 #+end_src
 
 *** Org
@@ -194,9 +198,15 @@ disable file search caching - it should always reflect the current state
 #+begin_src elisp :tangle packages.el
 
 (package! catppuccin-theme)
+(package! ef-themes)
 #+end_src
 
+Add themes directory to load path for custom jellybean themes:
+
 #+begin_src elisp :tangle config.el
+;; Add themes directory to load path
+(add-to-list 'custom-theme-load-path (expand-file-name "themes" doom-user-dir))
+
 (setq catppuccin-flavor 'latte)
 
 #+end_src
@@ -670,7 +680,7 @@ name as well to trigger updates"
   (defun claude-code-ide--with-nix-develop (orig-fun &rest args)
     "Advice to run claude-code-ide commands in nix develop environment when available."
     (let* ((current-dir default-directory)
-           (wrapper-script (expand-file-name "~/.doom.d/claude-code-nix-wrapper.sh"))
+           (wrapper-script (expand-file-name "~/.doom.d/nix-adapters/claude-code-nix-wrapper.sh"))
            (flake-dir (claude-code-ide--find-flake-dir current-dir)))
       (if (and (file-exists-p wrapper-script) flake-dir)
           (let ((default-directory flake-dir))
@@ -693,7 +703,7 @@ name as well to trigger updates"
   ;; Also modify the shell command to use our wrapper
   (defun claude-code-ide--get-wrapped-shell ()
     "Get shell command wrapped for nix develop environment."
-    (let ((wrapper-script (expand-file-name "~/.doom.d/claude-code-nix-wrapper.sh")))
+    (let ((wrapper-script (expand-file-name "~/.doom.d/nix-adapters/claude-code-nix-wrapper.sh")))
       (if (file-exists-p wrapper-script)
           (list wrapper-script shell-file-name)
         (list shell-file-name))))
@@ -933,23 +943,23 @@ Configure extra packages
 ;; Only hook to elixir-ts-mode, not find-file-hook
 (add-hook 'elixir-ts-mode-hook #'my/ensure-envrc-loaded-once)
 
-;; Universal Elixir-LS Direnv Integration
+;; Universal Elixir-LS Environment Integration
 ;; This configures LSP to use a universal wrapper script that automatically
-;; detects direnv environments and runs elixir-ls in the correct context.
-;; The wrapper script (~/.doom.d/elixir-ls-direnv-wrapper.sh) handles:
-;; - Automatic detection of .envrc files in project directories
-;; - Running elixir-ls via 'direnv exec' when .envrc is present
-;; - Falling back to global elixir-ls for non-direnv projects
+;; detects and activates the appropriate development environment:
+;; The wrapper script (~/.doom.d/nix-adapters/elixir-ls-universal-wrapper.sh) handles:
+;; - Nix flake detection and 'nix develop' activation (priority 1)
+;; - Direnv detection and 'direnv exec' activation (priority 2)  
+;; - Fallback to global elixir-ls for projects without environment management
 ;; This eliminates the need for per-project .dir-locals.el configuration.
 (after! lsp-mode
   (lsp-register-client
    (make-lsp-client
     :new-connection (lsp-stdio-connection
                      (lambda ()
-                       (list (expand-file-name "~/.doom.d/elixir-ls-direnv-wrapper.sh"))))
+                       (list (expand-file-name "~/.doom.d/nix-adapters/elixir-ls-universal-wrapper.sh"))))
     :major-modes '(elixir-mode elixir-ts-mode)
     :priority 1
-    :server-id 'elixir-ls-direnv
+    :server-id 'elixir-ls-universal
     :initialization-options (lambda () (list :dialyzerEnabled :json-false)))))
 
 #+end_src

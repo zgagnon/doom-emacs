@@ -77,7 +77,7 @@ module completions {
     [ "always" "never" "debug" "auto" ]
   }
 
-  # Apply the reverse of given revisions on top of another revision
+  # (deprecated; use `revert`) Apply the reverse of given revisions on top of another revision
   export extern "jj backout" [
     --revisions(-r): string   # The revision(s) to apply the reverse of
     --destination(-d): string # The revision to apply the reverse changes on top of
@@ -712,6 +712,8 @@ module completions {
   # Evaluate revset to full commit IDs
   export extern "jj debug revset" [
     revision: string
+    --no-resolve              # Do not resolve and evaluate expression
+    --no-optimize             # Do not rewrite expression to optimized form
     --repository(-R): path    # Path to repository to operate on
     --ignore-working-copy     # Don't snapshot the working copy, and don't update it
     --ignore-immutable        # Allow rewriting immutable commits
@@ -956,6 +958,7 @@ module completions {
     --from(-f): string        # Show changes from this revision
     --to(-t): string          # Show changes to this revision
     ...paths: path            # Restrict the diff to these paths
+    --template(-T): string    # Render each file diff entry using the given template
     --summary(-s)             # For each path, show only whether it was modified, added, or deleted
     --stat                    # Show a histogram of the changes
     --types                   # For each path, show only its type before and after
@@ -1064,7 +1067,7 @@ module completions {
 
   # Show how a change has evolved over time
   export extern "jj evolog" [
-    --revision(-r): string
+    --revisions(-r): string   # Follow changes from these revisions
     --limit(-n): string       # Limit number of revisions to show
     --reversed                # Show revisions in the opposite order (older revisions first)
     --no-graph                # Don't show the graph, show a flat list of revisions
@@ -1435,7 +1438,7 @@ module completions {
     --allow-empty-description # Allow pushing commits with empty descriptions
     --allow-private           # Allow pushing commits that are private
     --revisions(-r): string   # Push bookmarks pointing to these commits (can be repeated)
-    --change(-c): string      # Push this commit by creating a bookmark based on its change ID (can be repeated)
+    --change(-c): string      # Push this commit by creating a bookmark (can be repeated)
     --named: string           # Specify a new bookmark name and a revision to push under that name, e.g. '--named myfeature=@'
     --dry-run                 # Only display what will change on the remote
     --repository(-R): path    # Path to repository to operate on
