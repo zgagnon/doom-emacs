@@ -12,6 +12,8 @@
 (package! claude-code-ide
   :recipe (:type git :host github :repo "manzaltu/claude-code-ide.el"))
 
+(package! eat)
+
 (package! treesit-auto)
 (package! evil-textobj-tree-sitter)
 
