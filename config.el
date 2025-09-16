@@ -495,6 +495,11 @@ name as well to trigger updates"
       user-mail-address "zoe@zgagnon.com")
 
 (after! eat
+  ;; Enable yank to terminal for clipboard paste functionality
+  (setq eat-enable-yank-to-terminal t)
+  ;; Enable kill from terminal to add killed text to Emacs kill ring
+  (setq eat-enable-kill-from-terminal t)
+  
   (map! :leader
         (:prefix ("e" . "eat terminal")
          :desc "Reload eat terminal" "r" #'eat-reload
