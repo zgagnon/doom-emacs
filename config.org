@@ -637,16 +637,17 @@ name as well to trigger updates"
 (use-package! claude-code-ide
   :bind ("C-c C-`" . claude-code-ide-menu)
   :config
-  ;; Enable built-in Emacs MCP tools
-  (claude-code-ide-emacs-tools-setup)
+  ;; Ensure Emacs can find claude CLI from Nix profile
+  (add-to-list 'exec-path "/Users/zell/.nix-profile/bin")
   
-  (setq claude-code-ide-window-side 'right
-    claude-code-ide-window-width '100
-    claude-code-ide-focus-on-open t
-    claude-code-ide-terminal-backend 'eat
-    claude-code-ide-mcp-server-port 3000
-    claude-code-ide-enable-mcp-server t
-    )
+  ;; Basic configuration - start minimal to debug
+  (setq claude-code-ide-cli-path "/Users/zell/.nix-profile/bin/claude"
+        claude-code-ide-terminal-backend 'eat
+        claude-code-ide-window-side 'right
+        claude-code-ide-window-width 100)
+  
+  ;; Enable built-in Emacs MCP tools after basic setup
+  (claude-code-ide-emacs-tools-setup)
 
   ;; Add additional MCP tools configuration
   (setq claude-code-ide-mcp-tools
