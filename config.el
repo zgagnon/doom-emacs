@@ -392,10 +392,11 @@ name as well to trigger updates"
   :bind ("C-c C-`" . claude-code-ide-menu)
   :config
   ;; Ensure Emacs can find claude CLI from Nix profile
-  (add-to-list 'exec-path "/Users/zell/.nix-profile/bin")
+  (add-to-list 'exec-path (expand-file-name "~/.nix-profile/bin"))
   
   ;; Basic configuration - start minimal to debug
-  (setq claude-code-ide-cli-path "/Users/zell/.nix-profile/bin/claude"
+  (setq claude-code-ide-cli-path (or (executable-find "claude")
+                                     (expand-file-name "~/.nix-profile/bin/claude"))
         claude-code-ide-terminal-backend 'eat
         claude-code-ide-window-side 'right
         claude-code-ide-window-width 100)
