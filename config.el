@@ -69,6 +69,9 @@
 
 (global-subword-mode t)
 
+(map! :leader
+      :desc "Quit Emacs" "h Q" #'save-buffers-kill-emacs)
+
 (after! evil
   (setq evil-kill-on-visual-paste t))
 
@@ -345,8 +348,9 @@ name as well to trigger updates"
           ("user-interaction" . (:command "npx" :args ("-y" "interactive-mcp")))
           ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))))
 
-  (add-hook 'after-init-hook
-            #'mcp-hub-start-all-server)
+  ;; Don't start MCP servers automatically on startup
+  ;; (add-hook 'after-init-hook
+  ;;           #'mcp-hub-start-all-server)
 
   (defun gptel-mcp-register-tool ()
     (interactive)
