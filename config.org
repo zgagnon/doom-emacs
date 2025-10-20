@@ -729,7 +729,8 @@ name as well to trigger updates"
          :desc "Add a file to the chat context" "f" #'gptel-add-file
          :desc "Rewrite selected region" "r" #'gptel-rewrite
          :desc "Limit to org mode topic" "t" #'gptel-org-set-topic
-         
+         :desc "Send escape to Claude Code IDE" "<escape>" #'claude-code-ide-send-escape
+
          ;; MCP Hub commands under r p
          (:prefix ("p" . "MCP Hub")
           :desc "Open MCP Hub" "h" #'mcp-hub
@@ -1135,7 +1136,7 @@ Configure extra packages
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'catppuccin)
+(setq doom-theme 'tango)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.

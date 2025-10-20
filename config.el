@@ -475,7 +475,8 @@ name as well to trigger updates"
          :desc "Add a file to the chat context" "f" #'gptel-add-file
          :desc "Rewrite selected region" "r" #'gptel-rewrite
          :desc "Limit to org mode topic" "t" #'gptel-org-set-topic
-         
+         :desc "Send escape to Claude Code IDE" "<escape>" #'claude-code-ide-send-escape
+
          ;; MCP Hub commands under r p
          (:prefix ("p" . "MCP Hub")
           :desc "Open MCP Hub" "h" #'mcp-hub
