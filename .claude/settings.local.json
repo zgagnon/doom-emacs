@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Skill(discovery-tree-workflow)",
+      "mcp__run-typescript-skills__run-skill-code",
+      "WebSearch"
     ],
     "deny": []
   }

@@ -39,6 +39,7 @@
       :desc "Format org code block" "c b" #'my/org-format-code-block)
 
 (setq projectile-enable-caching nil)
+(setq projectile-require-project-root nil)
 
 ;; Add themes directory to load path
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" doom-user-dir))
@@ -638,7 +639,7 @@ name as well to trigger updates"
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'tango)
+(setq doom-theme 'biscotty)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
